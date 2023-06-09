@@ -85,6 +85,10 @@ public interface IValoresDAO extends JpaRepository<Valore, Integer> {
 	@Modifying
 	@Query(value = "CALL proc_registrar_historico(:idcamp,:idus,:idinvent,:valorn)", nativeQuery = true )
 	void actualizarValorEHistorial(@Param("idcamp") int idcampo, @Param("idus") int idusuario, @Param("idinvent") int idinventario, @Param("valorn") String valor);
+	@Transactional
+	@Modifying
+	@Query(value = "CALL proc_registrar_historico_sin_actualizar_valor(:idcamp,:idus,:idinvent,:valorn,:valorant)", nativeQuery = true )
+	void actualizarHistorial(@Param("idcamp") int idcampo, @Param("idus") int idusuario, @Param("idinvent") int idinventario, @Param("valorn") String valor, @Param("valorant")String valorant);
 	
 	
 }

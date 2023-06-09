@@ -1,5 +1,6 @@
 package com.isae.web.controller;
 
+import java.awt.image.BufferedImage;
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.File;
@@ -17,6 +18,8 @@ import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
+
+import javax.imageio.ImageIO;
 
 import org.apache.commons.collections.map.HashedMap;
 import org.apache.commons.io.FileUtils;
@@ -84,6 +87,8 @@ import com.isae.web.utils.CombinarPDF;
 import com.isae.web.utils.GenerarDocumentosUtils;
 import com.isae.web.utils.LeerDocumentoExcel;
 import com.isae.web.utils.PagingList;
+import ij.ImagePlus;
+import ij.process.ImageProcessor;
 
 @RestController
 //@RequestMapping("/inventario")
@@ -966,7 +971,6 @@ public class InventarioRestController {
         try {
         	
         	Map<String, Object> request = objectMapper.convertValue(body, Map.class);
-        	System.out.println(request);
         	
         	
         	Gson gson = new Gson();
@@ -987,18 +991,22 @@ public class InventarioRestController {
             for(Campos campo : listaAgrupaciones.get(indAgrupacion).getCampos() ) {
             	if(campo.getAgrupacion().equalsIgnoreCase("DATOS DEL REGISTRO")) {
             		inventario.setFolio(campo.getValor());
-            		this.inventario.cambiarFolio(estatus, inventario.getIdinventario());
+            		this.inventario.cambiarFolio(campo.getValor(), inventario.getIdinventario());
             	}
             	
-            	this.valores.actualizarValorEHistorial(campo.getIdCampo(), usuario.getIdusuario(), inventario.getIdinventario(), campo.getValor());
+            	if(!campo.getTipoCampo().equals("FOTO") || !campo.getTipoCampo().equals("CHECKBOX-EVIDENCIA") || !campo.getTipoCampo().equals("FIRMA")) {            		
+            		this.valores.actualizarValorEHistorial(campo.getIdCampo(), usuario.getIdusuario(), inventario.getIdinventario(), campo.getValor());
+            	}
+            	
             }
             
             if(request.get("firmas") != null) {
             	System.out.println("Datos con Firmas");
             	json= gson.toJson(request.get("firmas"));
             	listaFirmas = gson.fromJson(json, new TypeToken<List<Firma>>(){}.getType());
-            	for(Firma firma : listaFirmas) {            		
-            		actualizarFirma(firma);
+            	System.out.println("Cantidad de Firmas: " +listaFirmas.size());
+            	for(Firma firma : listaFirmas) {
+            		actualizarFirma(firma,usuario.getIdusuario());
             	}
             }
             if(request.get("fotos") != null) {
@@ -1026,7 +1034,7 @@ public class InventarioRestController {
 	}
 	
 	
-	public String actualizarFirma(Firma firma) {
+	public String actualizarFirma(Firma firma, int idUsuario) {
 		String respuesta = "";
 		
 		List<firmasdocumento> lista = this.firma.obtenerConcidencia(firma.getNombreFirma(), firma.getCamposProyecto().getIdcamposproyecto(), firma.getInventario().getIdinventario());
@@ -1045,33 +1053,56 @@ public class InventarioRestController {
 		
 		try {
 			File firmaFile = File.createTempFile(nuevaFirma.getNombrefirma(), ".png");
+			boolean mismaFirma = false;
+			String firmaAnterior = "";
 			
 			FileUtils.writeByteArrayToFile(firmaFile, firmaByte);
+					
+			if(!lista.isEmpty()) {
+				firmaAnterior = lista.get(0).getUrl();
+				mismaFirma = compararImagenes(firmaFile.getPath(),descargarArchivo(new URL(firmaAnterior), "firmaAnterior.png"));
+			}
 			
 			
-			String urlFirma = guardarFirma(nuevaFirma.getInventario(), firmaFile, nuevaFirma.getNombrefirma());
+			String urlFirma = guardarEvidencia(nuevaFirma.getInventario(), firmaFile, nuevaFirma.getNombrefirma(), "Firmas");
 
 			System.out.println("Tamaño de la firma: " + firma.getFirma().size());
+			System.out.println("Lista de firmas: "+ lista);
 			if(!lista.isEmpty()) {
 				if(firma.getFirma().size() == 0) {
 					this.firma.deleteById(lista.get(0).getIdfirma());
 					this.valores.actualizaridValorValores("FALSE", lista.get(0).getCamposProyecto().getIdcamposproyecto(), lista.get(0).getInventario().getIdinventario());
+					this.valores.actualizarValorEHistorial(firma.getCamposProyecto().getIdcamposproyecto(), idUsuario, firma.getInventario().getIdinventario(), "FIRMA ELIMINADA");
 				}else {
 					nuevaFirma.setIdfirma(lista.get(0).getIdfirma());
 					nuevaFirma.setUrl(urlFirma);
 					this.firma.save(nuevaFirma);
 					this.valores.actualizaridValorValores("TRUE", lista.get(0).getCamposProyecto().getIdcamposproyecto(), lista.get(0).getInventario().getIdinventario());
+					if(mismaFirma) {
+						System.out.println("La firma es la misma");
+					}else {
+						//TODO: aun no guarda el historico correctamente
+						System.out.println("La firma es diferente");
+						System.out.println("IdCampoProyecto: "+ firma.getCamposProyecto().getIdcamposproyecto() + " IdInventario: " + firma.getInventario().getIdinventario() + " ValorN: "+ urlFirma + " ValorAnt: " + firmaAnterior);
+						String urlHistorico = guardarEvidencia(nuevaFirma.getInventario(), firmaFile,
+								firma.getNombreFirma()+"-"+ new Date(), "Historico");
+						this.valores.actualizarHistorial(firma.getCamposProyecto().getIdcamposproyecto(), idUsuario, firma.getInventario().getIdinventario(), urlHistorico,firmaAnterior);
+					}
 				}
 			}else {
 				if(firma.getFirma().size() != 0) {
 					nuevaFirma.setUrl(urlFirma);
 					this.firma.save(nuevaFirma);
-					this.valores.actualizaridValorValores("TRUE", lista.get(0).getCamposProyecto().getIdcamposproyecto(), lista.get(0).getInventario().getIdinventario());
+					this.valores.actualizaridValorValores("TRUE", firma.getCamposProyecto().getIdcamposproyecto(), firma.getInventario().getIdinventario());
+					
+					String urlHistorico = guardarEvidencia(nuevaFirma.getInventario(), firmaFile,
+							firma.getNombreFirma()+"-"+ new Date(), "Historico");
+					this.valores.actualizarValorEHistorial(firma.getCamposProyecto().getIdcamposproyecto(), idUsuario, firma.getInventario().getIdinventario(), urlHistorico);
 				}
 			}
 			
 		} catch (IOException e) {
-			e.printStackTrace();
+			System.out.println("Error: "+ e);
 		}
 		
 		respuesta= "Correcto";
@@ -1079,6 +1110,49 @@ public class InventarioRestController {
 		return respuesta;
 		
 	}
+	
+//	https://firebasestorage.googleapis.com/v0/b/isae-de6da.appspot.com/o/Proyectos%2F66-FIRMAS%2F148549-PRUEBA%20HISTORIAL-FIRMAS-18%2FFirmas%2FFIRMA%20TECNICO?alt=media&token=FIRMATECNICO.png 
+//	https://firebasestorage.googleapis.com/v0/b/isae-de6da.appspot.com/o/Proyectos%2F66-FIRMAS%2F148549-PRUEBA%20HISTORIAL-FIRMAS-18%2FFirmas%2FFIRMA%20TECNICO?alt=media&token=FIRMATECNICO.png
+	
+	public static boolean compararImagenes(String rutaImagen1, String rutaImagen2) {
+       boolean iguales = true;
+       System.out.println("Ruta 1: " + rutaImagen1);
+       System.out.println("Ruta 2: " + rutaImagen2);
+       try {
+		BufferedImage imagen1 = ImageIO.read(new File(rutaImagen1));
+		BufferedImage imagen2 = ImageIO.read(new File(rutaImagen2));
+		int anchoImagen1 = imagen1.getWidth();
+		int altoImagen1 = imagen1.getHeight();
+		int anchoImagen2 = imagen2.getWidth();
+		int altoImagen2 = imagen2.getHeight();
+		System.out.println("Ancho 1: " + anchoImagen1);
+		System.out.println("Alto 1: " + altoImagen1);
+		System.out.println("Ancho 2: " + anchoImagen2);
+		System.out.println("Alto 2: " + altoImagen2);
+
+		if (anchoImagen1 != anchoImagen2 || altoImagen1 != altoImagen2) {
+		    System.out.println("Las imágenes tienen dimensiones diferentes.");
+		    return false;
+		}
+		
+		for (int y = 0; y < altoImagen1; y++) {
+		    for (int x = 0; x < anchoImagen1; x++) {
+		        int rgbImagen1 = imagen1.getRGB(x, y);
+		        int rgbImagen2 = imagen2.getRGB(x, y);		        
+		        if (rgbImagen1 != rgbImagen2) {
+		            System.out.println("Las imágenes son diferentes.");
+		            return false;
+		        }
+		    }
+		}
+		
+	} catch (IOException e) {
+		// TODO Auto-generated catch block
+		e.printStackTrace();
+	}
+       
+       return iguales;
+    }
 	
 	public String actualizarEvidencia(int idUsuario, List<Evidencia> evidencias) {
 		String respuesta = "Error";
@@ -1102,22 +1176,42 @@ public class InventarioRestController {
 
 			try {
 				File evidenciaFile = File.createTempFile(nuevaEvidencia.getNombrefoto().length() <= 3 ? "000"+nuevaEvidencia.getNombrefoto()  :nuevaEvidencia.getNombrefoto(), ".png");
+				boolean mismaEvidencia = false;
+				String evidenciaAnterior= "";
 
 				FileUtils.writeByteArrayToFile(evidenciaFile, evidenciaByte);
+				
+				if(!lista.isEmpty()) {
+					evidenciaAnterior = lista.get(0).getUrl();
+					mismaEvidencia = compararImagenes(evidenciaFile.getPath(),descargarArchivo(new URL(evidenciaAnterior), "firmaAnterior.png"));
+				}
 
-				String urlFirma = guardarEvidencia(nuevaEvidencia.getInventario(), evidenciaFile,
-						nuevaEvidencia.getNombrefoto());
+				String urlEvidencia = guardarEvidencia(nuevaEvidencia.getInventario(), evidenciaFile,
+						nuevaEvidencia.getNombrefoto(), "Evidencias");
 
 				if (!lista.isEmpty()) {
 					nuevaEvidencia.setIdfoto(lista.get(0).getIdfoto());
-					nuevaEvidencia.setUrl(urlFirma);
+					nuevaEvidencia.setUrl(urlEvidencia);
 					if(idUsuario == 0) {
 						nuevaEvidencia.setUsuario(lista.get(0).getUsuario());
 					}
 					this.fotoEvidencia.save(nuevaEvidencia);
+					//TODO: comprobar si es la misma evidencia
+					if(mismaEvidencia) {
+						System.out.println("La evidencia es la misma");
+					}else {
+						System.out.println("La evidencia es diferente");
+						this.valores.actualizarHistorial(nuevaEvidencia.getCampoProyecto().getIdcamposproyecto(), idUsuario, nuevaEvidencia.getInventario().getIdinventario(), urlEvidencia,evidenciaAnterior);
+					}
 				} else {
-					nuevaEvidencia.setUrl(urlFirma);
+					
+					nuevaEvidencia.setUrl(urlEvidencia);
 					this.fotoEvidencia.save(nuevaEvidencia);
+					
+					String urlHistorico = guardarEvidencia(nuevaEvidencia.getInventario(), evidenciaFile,
+							nuevaEvidencia.getNombrefoto()+"-"+ new Date(), "Historico");
+					this.valores.actualizarHistorial(evidencia.getCamposProyecto().getIdcamposproyecto(), idUsuario, evidencia.getInventario().getIdinventario(), urlHistorico,"");
+					System.out.println("Se actualizo el historico de la imagen");
 				}
 
 			} catch (IOException e) {
@@ -1131,51 +1225,7 @@ public class InventarioRestController {
 
 	}
 	
-	public String guardarEvidencia(Inventario inventario, File file, String nombreFirma) {
-		try {
-
-			URL url = new URL(
-					"https://firebasestorage.googleapis.com/v0/b/isae-de6da.appspot.com/o/Services%2Fgoogle-services.json?alt=media&token=142d6393-2405-44d4-bc20-6de945e391bc");
-			FileInputStream serviceAccount = new FileInputStream(descargarArchivo(url, "google-service-descarga.json"));
-			String bucketName = "isae-de6da.appspot.com";
-			boolean bandera = true;
-			Storage storage = (Storage) getStrogaeOptions(serviceAccount).getService();
-
-			if (file != null) {
-				String objectName = "Proyectos/" + inventario.getProyecto().getIdproyecto() + "-"
-						+ inventario.getProyecto().getProyecto().toUpperCase() + "/" + inventario.getIdinventario()
-						+ "-" + inventario.getFolio() + "/Evidencias/" + nombreFirma;
-
-				Map<String, String> map = new HashMap<>();
-				map.put("firebaseStorageDownloadTokens", nombreFirma.replace(" ", "") + ".png");
-
-				BlobId blobId = BlobId.of(bucketName, objectName);
-				BlobInfo blobInfo = BlobInfo.newBuilder(blobId).setContentType("image/png").setMetadata(map).build();
-
-				Blob b = storage.create(blobInfo, new FileInputStream(file.getAbsolutePath()),
-						new Storage.BlobWriteOption[0]);
-
-				System.out.println("File format uploaded to bucket " + bucketName + " as " + objectName);
-
-// Sirve para crear un link temporal para la descarga del archivo almacenado en Firebase
-//				URL urlFirma = storage.signUrl(blobInfo, 15, TimeUnit.MINUTES, Storage.SignUrlOption.withV4Signature());
-
-				String[] direccionTemporal = b.getSelfLink().split("/");
-
-				String urlFirma = generarUrl(direccionTemporal, b.getMetadata().get("firebaseStorageDownloadTokens"));
-
-				return urlFirma;
-			}
-
-		} catch (IOException e) {
-
-			System.out.println("Exception " + e.getMessage());
-			return "Error al guardar la firma";
-		}
-		return "";
-	}
-	
-	public String guardarFirma(Inventario inventario, File file, String nombreFirma) {
+	public String guardarEvidencia(Inventario inventario, File file, String nombreFirma, String tipo) {
 		try {
 			
 	
@@ -1188,7 +1238,7 @@ public class InventarioRestController {
 			if (file != null) {
 				String objectName = "Proyectos/" + inventario.getProyecto().getIdproyecto() + "-"
 						+ inventario.getProyecto().getProyecto().toUpperCase() + "/" + inventario.getIdinventario()
-						+ "-"+inventario.getFolio()+"/Firmas/"+nombreFirma;
+						+ "-"+inventario.getFolio()+"/"+tipo+"/"+nombreFirma;
 
 				Map<String, String> map = new HashMap<>();
 		        map.put("firebaseStorageDownloadTokens", nombreFirma.replace(" ", "")+".png");

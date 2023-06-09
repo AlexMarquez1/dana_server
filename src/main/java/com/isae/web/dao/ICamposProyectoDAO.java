@@ -32,7 +32,7 @@ public interface ICamposProyectoDAO extends JpaRepository<Camposproyecto, Intege
 	@Query(value= "SELECT * FROM camposproyecto WHERE idproyecto = :idProyecto AND tipocampo = 'CHECKBOX'", nativeQuery = true)
 	List<Camposproyecto> obtenerCheckBoxPorProyecto(@Param("idProyecto") int idProyecto);
 	
-	@Query(value= "SELECT * FROM camposproyecto WHERE idproyecto = :idProyecto AND tipocampo = 'CHECKBOX-EVIDENCIA' OR tipocampo = 'FOTO'", nativeQuery = true)
+	@Query(value= "SELECT * FROM camposproyecto WHERE idproyecto = :idProyecto AND tipocampo IN ('CHECKBOX-EVIDENCIA', 'FOTO')", nativeQuery = true)
 	List<Camposproyecto> obtenerCheckBoxEvidenciaPorProyecto(@Param("idProyecto") int idProyecto);
 	
 	@Query(value= "SELECT * FROM camposproyecto WHERE idproyecto = :idProyecto AND campo = :campo", nativeQuery = true)
