@@ -55,4 +55,7 @@ public interface IInventarioDAO extends JpaRepository<Inventario,Integer>{
 	@Query(value="SELECT estatus, COUNT(estatus) FROM `inventario` WHERE idproyecto =:idproyecto GROUP BY estatus", nativeQuery= true)
 	List<Object> obtenerTotalEstatusProyecto(@Param("idproyecto") int idproyecto);
 	
+	@Query(value="SELECT inventario.estatus, COUNT(inventario.estatus) FROM `asignacionregistro` INNER JOIN inventario ON inventario.idinventario = asignacionregistro.idinventario WHERE inventario.idproyecto =:idproyecto AND asignacionregistro.idusuario =:idusuario GROUP BY inventario.estatus", nativeQuery= true)
+	List<Object> obtenerTotalEstatusProyectoAsignados(@Param("idproyecto") int idproyecto, @Param("idusuario") int idusuario);
+	
 }

@@ -23,6 +23,8 @@ public class Proyecto implements Serializable {
 	private Date fechacreacion;
 
 	private String proyecto;
+	
+	private String target;
 
 	//bi-directional many-to-one association to Tipoproyecto
 	@ManyToOne
@@ -45,17 +47,19 @@ public class Proyecto implements Serializable {
 		this.tipoproyecto = tipoproyecto;
 	}
 
-	public Proyecto(int idproyecto, Date fechacreacion, String proyecto, Tipoproyecto tipoproyecto,
+	public Proyecto(int idproyecto, Date fechacreacion, String proyecto, String target, Tipoproyecto tipoproyecto,
 			String folioautomatico) {
+		super();
 		this.idproyecto = idproyecto;
 		this.fechacreacion = fechacreacion;
 		this.proyecto = proyecto;
+		this.target = target;
 		this.tipoproyecto = tipoproyecto;
 		this.folioautomatico = folioautomatico;
 	}
 
 	public int getIdproyecto() {
-		return this.idproyecto;
+		return idproyecto;
 	}
 
 	public void setIdproyecto(int idproyecto) {
@@ -63,7 +67,7 @@ public class Proyecto implements Serializable {
 	}
 
 	public Date getFechacreacion() {
-		return this.fechacreacion;
+		return fechacreacion;
 	}
 
 	public void setFechacreacion(Date fechacreacion) {
@@ -71,15 +75,23 @@ public class Proyecto implements Serializable {
 	}
 
 	public String getProyecto() {
-		return this.proyecto;
+		return proyecto;
 	}
 
 	public void setProyecto(String proyecto) {
 		this.proyecto = proyecto;
 	}
 
+	public String getTarget() {
+		return target;
+	}
+
+	public void setTarget(String target) {
+		this.target = target;
+	}
+
 	public Tipoproyecto getTipoproyecto() {
-		return this.tipoproyecto;
+		return tipoproyecto;
 	}
 
 	public void setTipoproyecto(Tipoproyecto tipoproyecto) {
@@ -97,8 +109,7 @@ public class Proyecto implements Serializable {
 	@Override
 	public String toString() {
 		return "Proyecto [idproyecto=" + idproyecto + ", fechacreacion=" + fechacreacion + ", proyecto=" + proyecto
-				+ ", tipoproyecto=" + tipoproyecto + ", folioautomatico=" + folioautomatico + "]";
+				+ ", target=" + target + ", tipoproyecto=" + tipoproyecto + ", folioautomatico=" + folioautomatico
+				+ "]";
 	}
-
-
 }

@@ -11,7 +11,10 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RestController;
 
+import com.isae.web.dao.IAsignacionProyectoDAO;
 import com.isae.web.dao.IInventarioDAO;
+import com.isae.web.entity.Asignacionproyecto;
+import com.isae.web.entity.Proyecto;
 
 @RestController
 public class DashboardController {
@@ -19,6 +22,9 @@ public class DashboardController {
 	
 	@Autowired
 	private IInventarioDAO inventario;
+	
+	@Autowired
+	private IAsignacionProyectoDAO asignacionRegistro;
 	
 	
 	@CrossOrigin(origins = "*")
@@ -58,6 +64,28 @@ public class DashboardController {
 		}
 
 		return respuesta;
+	}
+	
+	@CrossOrigin(origins = "*")
+	@GetMapping("/obtener/total/estatus/proyecto/usuario/{idusuario}")
+	public Map<String,Object> obtenerTotalEstatusProyectoPorIdUsuario(@PathVariable(value = "idusuario") String idusuario) {
+		Map<String, Object> proyectos = new HashMap<>();
+		List<Object> consulta = new ArrayList<Object>();
+		
+		List<Asignacionproyecto> listaProyectos = this.asignacionRegistro.obtenerProyectosAsignados(Integer.parseInt(idusuario));
+
+		for(Asignacionproyecto asignacion : listaProyectos) {			
+			consulta = this.inventario.obtenerTotalEstatusProyectoAsignados(asignacion.getProyecto().getIdproyecto(), Integer.parseInt(idusuario));
+			Map<String, Object> aux = new HashMap<>();
+			for(Object item : consulta) {
+				Object [] objeto  = (Object[]) item;
+				aux.put(objeto[0].toString(),objeto[1]);
+			}
+			proyectos.put(asignacion.getProyecto().getProyecto(), aux);
+			
+		}
+
+		return proyectos;
 	}
 
 }
