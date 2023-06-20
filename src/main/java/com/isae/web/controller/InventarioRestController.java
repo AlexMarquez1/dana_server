@@ -76,7 +76,6 @@ import com.isae.web.entity.Fotoevidencia;
 import com.isae.web.entity.Inventario;
 import com.isae.web.entity.Perfile;
 import com.isae.web.entity.Proyecto;
-import com.isae.web.entity.Registro;
 import com.isae.web.entity.Tipoproyecto;
 import com.isae.web.entity.Usuario;
 import com.isae.web.entity.Valore;
@@ -142,14 +141,14 @@ public class InventarioRestController {
 	@CrossOrigin(origins = "*")
 	@PostMapping("/registrar/registro/plantilla/{idProyecto}")
 	public List<String> registrarRegistroPlantilla(@PathVariable(value = "idProyecto") String idProyecto,
-			@RequestBody List<Registro> listaRegistro) {
+			@RequestBody List<Inventario> listaRegistro) {
 		List<String> respuesta = new ArrayList<>();
 		List<String> folios = new ArrayList<>();
 		List<Inventario> listaInventario = new ArrayList<Inventario>();
 		int size = listaRegistro.size();
 		for (int i = 0; i < size; i++) {
 			folios.add(listaRegistro.get(i).getFolio());
-			listaInventario.add(new Inventario(listaRegistro.get(i).getIdRegistro(), new Date(),
+			listaInventario.add(new Inventario(listaRegistro.get(i).getIdinventario(), new Date(),
 					listaRegistro.get(i).getFolio().isEmpty() ? "NUEVO REGISTRO" : listaRegistro.get(i).getFolio(),
 					"NUEVO", listaRegistro.get(i).getProyecto()));
 		}
@@ -195,28 +194,21 @@ public class InventarioRestController {
 
 	@CrossOrigin(origins = "*")
 	@GetMapping("/obtener/registros/{idProyecto}")
-	public List<Registro> getRegistros(@PathVariable(value = "idProyecto") String idProyecto) {
-		List<Registro> listaRegistro = new ArrayList<Registro>();
+	public List<Inventario> getRegistros(@PathVariable(value = "idProyecto") String idProyecto) {
 		List<Inventario> lista = this.inventario.obtenerPorIdProyecto(Integer.parseInt(idProyecto));
-		System.out.println(lista);
-		for (Inventario item : lista) {
-			listaRegistro.add(new Registro(item.getIdinventario(), item.getFolio(), item.getFechacreacion().toString(),
-					item.getProyecto(), item.getEstatus()));
-		}
-		return listaRegistro;
+		return lista;
 	}
 
 	@CrossOrigin(origins = "*")
 	@GetMapping("/obtener/registros/busqueda/{idProyecto}/{busqueda}")
-	public List<Registro> getRegistrosBusqueda(@PathVariable(value = "idProyecto") String idProyecto,
+	public List<Inventario> getRegistrosBusqueda(@PathVariable(value = "idProyecto") String idProyecto,
 			@PathVariable(value = "busqueda") String busqueda) {
 		List<VistaRegistroBusqueda> lista = this.vistaRegistroBusqueda.datosBusqueda(busqueda,
 				Integer.parseInt(idProyecto));
-		List<Registro> listaRegistro = new ArrayList<Registro>();
+		List<Inventario> listaRegistro = new ArrayList<Inventario>();
 
 		for (VistaRegistroBusqueda item : lista) {
-			listaRegistro.add(new Registro(item.getIdinventario(), item.getFolio(),
-					item.getFechacreacionregistro().toString(), item.getProyecto(), ""));
+			listaRegistro.add(new Inventario(item.getIdinventario(),item.getFechacreacionregistro(),item.getFolio(),"",item.getProyecto()));
 		}
 
 		return listaRegistro;
@@ -287,15 +279,15 @@ public class InventarioRestController {
 
 	@CrossOrigin(origins = "*")
 	@PostMapping("/generar/documento/registros")
-	public List<Integer> descargarRegistros(@RequestBody List<Registro> listaRegistros) {
+	public List<Integer> descargarRegistros(@RequestBody List<Inventario> listaRegistros) {
 		List<Integer> lista = new ArrayList<Integer>();
 		List<Proyecto> listaProyectos = new ArrayList<Proyecto>();
 		List<String> auxProyecto = new ArrayList<String>();
 		Map<String, List<Camposproyecto>> camposProyectos = new HashMap<>();
-		Map<String, List<Registro>> registros = new HashMap<>();
+		Map<String, List<Inventario>> registros = new HashMap<>();
 		List<List<Valore>> valores = new ArrayList<List<Valore>>();
 
-		for (Registro registro : listaRegistros) {
+		for (Inventario registro : listaRegistros) {
 			if (!auxProyecto.contains(registro.getProyecto().getProyecto())) {
 				listaProyectos.add(registro.getProyecto());
 				auxProyecto.add(registro.getProyecto().getProyecto());
@@ -306,8 +298,8 @@ public class InventarioRestController {
 		for (Proyecto proyecto : listaProyectos) {
 			camposProyectos.put(proyecto.getProyecto(),
 					this.camposProyecto.obtenerCatalogoCampoPorProyecto(proyecto.getIdproyecto()));
-			List<Registro> auxRegistro = new ArrayList<Registro>();
-			for (Registro registro : listaRegistros) {
+			List<Inventario> auxRegistro = new ArrayList<Inventario>();
+			for (Inventario registro : listaRegistros) {
 				if (registro.getProyecto().getProyecto().equalsIgnoreCase(proyecto.getProyecto())) {
 					auxRegistro.add(registro);
 				}
@@ -338,7 +330,7 @@ public class InventarioRestController {
 
 	@CrossOrigin(origins = "*")
 	@PostMapping("/generar/documento/registros/{idproyecto}")
-	public List<Integer> descargarRegistros(@RequestBody List<Registro> listaRegistros,
+	public List<Integer> descargarRegistros(@RequestBody List<Inventario> listaRegistros,
 			@PathVariable(value = "idproyecto") String idProyecto) {
 		List<VistaDatosISSSTE> respuesta = new ArrayList<VistaDatosISSSTE>();
 		List<Integer> lista = new ArrayList<Integer>();
@@ -347,9 +339,9 @@ public class InventarioRestController {
 		List<Integer> listaIds = new ArrayList<Integer>();
 
 		
-		for (Registro item : listaRegistros) {
+		for (Inventario item : listaRegistros) {
 //			listaInventarios.add(new Inventario(item.getIdRegistro()));
-			listaIds.add(item.getIdRegistro());
+			listaIds.add(item.getIdinventario());
 		}
 		
 		System.out.println("Inicia la carga de datos");
@@ -939,18 +931,10 @@ public class InventarioRestController {
 
 	@CrossOrigin(origins = "*")
 	@GetMapping("/obtener/registro/id/{idRegistro}")
-	public Registro getRegistro(@PathVariable(value = "idRegistro") String idRegistro) {
-		Registro registro = new Registro();
+	public Inventario getRegistro(@PathVariable(value = "idRegistro") String idRegistro) {
 		Inventario inventario = this.inventario.findById(Integer.parseInt(idRegistro)).get();
 		System.out.println(inventario);
-
-		registro.setEstatus(inventario.getEstatus());
-		registro.setFechaCreacion(inventario.getFechacreacion().toString());
-		registro.setFolio(inventario.getFolio());
-		registro.setIdRegistro(inventario.getIdinventario());
-		registro.setProyecto(inventario.getProyecto());
-
-		return registro;
+		return inventario;
 	}
 	
 	@CrossOrigin(origins = "*")

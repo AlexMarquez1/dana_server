@@ -1,9 +1,12 @@
 package com.isae.web.controller;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.scheduling.annotation.Async;
 import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -13,8 +16,10 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.isae.web.dao.IAsignarRegistroDAO;
+import com.isae.web.dao.IEstatusProyecto;
 import com.isae.web.dao.IInventarioDAO;
 import com.isae.web.entity.Asignacionregistro;
+import com.isae.web.entity.EstatusProyecto;
 import com.isae.web.entity.Inventario;
 import com.isae.web.entity.Proyecto;
 import com.isae.web.entity.Usuario;
@@ -29,6 +34,9 @@ public class AsignacionRegistroRestController {
 	
 	@Autowired
 	private IInventarioDAO inventario;
+	
+	@Autowired
+	private IEstatusProyecto estatusProyecto;
 	
 	@CrossOrigin(origins = "*")
 	@PostMapping("/asignar/registro/{idUsuario}")
@@ -69,10 +77,34 @@ public class AsignacionRegistroRestController {
 			@PathVariable(value = "idproyecto") String idProyecto,
 			@PathVariable(value = "idusuario") String idUsuario) {
 		List<Inventario> respuesta = new ArrayList<Inventario>();
-		List<Asignacionregistro> lista = this.asignarRegistro.obtenerRegistrosAsignadosUsuarioProyecto(Integer.parseInt(idUsuario),Integer.parseInt(idProyecto));
-		for(Asignacionregistro item : lista) {
-			respuesta.add(item.getInventario());
-		}
+		System.out.println("Obteniendo registros");
+		List<Inventario> lista = this.asignarRegistro.obtenerRegistrosAsignadosUsuarioProyecto(new Usuario(Integer.parseInt(idUsuario)),new Proyecto( Integer.parseInt(idProyecto)));
+		System.out.println(lista.size());
+//		for(Asignacionregistro item : lista) {
+//			respuesta.add(item.getInventario());
+//		}
+
+		return lista;
+	}
+	
+	@Async("threadPoolTaskExecutor")
+	@CrossOrigin(origins = "*")
+	@GetMapping("/obtener/registros/estatus/proyecto/usuario/{idproyecto}/{idusuario}")
+	public Map<String, Object> obtenerRegistrosPorProyectoYEstatus(
+			@PathVariable(value = "idproyecto") String idProyecto,
+			@PathVariable(value = "idusuario") String idUsuario) {
+		Map<String, Object> respuesta = new HashMap<String,Object>();
+		
+//		List<Inventario> listaInventarios = new ArrayList<Inventario>();
+		
+		List<EstatusProyecto> estatus = this.estatusProyecto.obtenerEstatusPorProyecto(Integer.parseInt(idProyecto));
+		List<Inventario> listaInventarios = this.asignarRegistro.obtenerRegistrosAsignadosUsuarioProyecto(new Usuario(Integer.parseInt(idUsuario)),new Proyecto( Integer.parseInt(idProyecto)));
+		
+//		for(Asignacionregistro item : lista) {
+//			listaInventarios.add(item.getInventario());
+//		}
+		respuesta.put("Estatus", estatus);
+		respuesta.put("inventario", listaInventarios);
 
 		return respuesta;
 	}

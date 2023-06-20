@@ -12,6 +12,9 @@ import org.springframework.stereotype.Repository;
 import org.springframework.stereotype.Service;
 
 import com.isae.web.entity.Asignacionregistro;
+import com.isae.web.entity.Inventario;
+import com.isae.web.entity.Proyecto;
+import com.isae.web.entity.Usuario;
 
 
 @Repository
@@ -22,11 +25,12 @@ public interface IAsignarRegistroDAO extends JpaRepository<Asignacionregistro,In
 	@Query(value= "DELETE FROM asignacionregistro WHERE idusuario = :idUsuario AND idinventario = :idinventario", nativeQuery = true)
 	void eliminarAsignacionRegistro(@Param("idUsuario") int idUsuario, @Param("idinventario") int idinventario);
 	
-	@Query(value= "SELECT * FROM asignacionregistro WHERE idusuario = :idusuario", nativeQuery = true)
-	List<Asignacionregistro> obtenerRegistrosAsignadosUsuario(@Param("idusuario") int idusuario);
+	@Query(value= "SELECT a.inventario FROM Asignacionregistro a WHERE a.usuario = :usuario" )
+	List<Inventario> obtenerRegistrosAsignadosUsuario(@Param("usuario") Usuario usuario);
 	
-	@Query(value= "SELECT asignacionregistro.idasignacion, asignacionregistro.idusuario, asignacionregistro.idinventario FROM asignacionregistro INNER JOIN inventario ON inventario.idinventario = asignacionregistro.idinventario WHERE asignacionregistro.idusuario = :idusuario AND inventario.idproyecto = :idproyecto ORDER BY CAST(SUBSTRING_INDEX(folio, '-',1) AS UNSIGNED), CAST(SUBSTRING_INDEX(folio, '-',-1) AS UNSIGNED), inventario.folio, inventario.idinventario", nativeQuery = true)
-	List<Asignacionregistro> obtenerRegistrosAsignadosUsuarioProyecto(@Param("idusuario") int idusuario, @Param("idproyecto") int idproyecto);
+//	@Query(value= "SELECT inventario.idinventario, inventario.fechacreacion, inventario.folio, inventario.estatus, inventario.idproyecto FROM asignacionregistro INNER JOIN inventario ON inventario.idinventario = asignacionregistro.idinventario WHERE asignacionregistro.idusuario = :idusuario AND inventario.idproyecto = :idproyecto ORDER BY CAST(SUBSTRING_INDEX(folio, '-',1) AS UNSIGNED), CAST(SUBSTRING_INDEX(folio, '-',-1) AS UNSIGNED), inventario.folio, inventario.idinventario", nativeQuery = true)
+	@Query(value= "SELECT i FROM Asignacionregistro a INNER JOIN a.inventario i WHERE a.usuario=:usuario AND i.proyecto=:proyecto ORDER BY i.folio, i.idinventario")
+	List<Inventario> obtenerRegistrosAsignadosUsuarioProyecto(@Param("usuario") Usuario usaurio, @Param("proyecto") Proyecto proyecto);
 	
 	@Query(value="SELECT COUNT(*) FROM asignacionregistro INNER JOIN inventario ON inventario.idinventario = asignacionregistro.idinventario WHERE asignacionregistro.idusuario = :idusuario AND inventario.idproyecto = :idproyecto", nativeQuery = true)
 	int obtenerUltimoIngresadoPorUsuario(@Param("idusuario") int idUsuario, @Param("idproyecto") int idProyecto);

@@ -17,7 +17,6 @@ import com.isae.web.entity.Asignacionproyecto;
 import com.isae.web.entity.Asignacionregistro;
 import com.isae.web.entity.Inventario;
 import com.isae.web.entity.Proyecto;
-import com.isae.web.entity.Registro;
 import com.isae.web.entity.Usuario;
 
 
@@ -82,30 +81,25 @@ public class AsignacionProyectoRestController {
 	
 	@CrossOrigin(origins = "*")
 	@GetMapping("/obtener/registros/asignados/usuario/proyecto/{idusuario}/{idproyecto}")
-	public List<Registro> getRegistrosAsignadosUsuarioProyecto(
+	public List<Inventario> getRegistrosAsignadosUsuarioProyecto(
 			@PathVariable(value = "idusuario") String idUsuario,
 			@PathVariable(value = "idproyecto") String idProyecto
 			) {
-		List<Asignacionregistro> listaAsignacionRegistros;
-		List<Registro> listaRegistro = new ArrayList<Registro>();
+		List<Inventario> listaAsignacionRegistros;
+		List<Inventario> listaRegistro = new ArrayList<Inventario>();
 		if(idProyecto.equalsIgnoreCase("0")) {
-			listaAsignacionRegistros = this.asignarRegistro.obtenerRegistrosAsignadosUsuario(Integer.parseInt(idUsuario));
+			listaAsignacionRegistros = this.asignarRegistro.obtenerRegistrosAsignadosUsuario(new Usuario(Integer.parseInt(idUsuario)));
 			
 		}else {
-			listaAsignacionRegistros = this.asignarRegistro.obtenerRegistrosAsignadosUsuarioProyecto(Integer.parseInt(idUsuario), Integer.parseInt(idProyecto));
+			listaAsignacionRegistros = this.asignarRegistro.obtenerRegistrosAsignadosUsuarioProyecto(new Usuario(Integer.parseInt(idUsuario)), new Proyecto(Integer.parseInt(idProyecto)));
 		}
 		
 		if(listaAsignacionRegistros.isEmpty() && idUsuario.equalsIgnoreCase("0")) {
-			List<Inventario> respuesta = this.inventario.findAll();
-			
-			for(Inventario item : respuesta) {
-				listaRegistro.add(new Registro(item.getIdinventario(),item.getFolio(),item.getFechacreacion().toString(),item.getProyecto(),item.getEstatus()));
-			}
+			listaRegistro = this.inventario.findAll();
 			
 		}else {
-			for(Asignacionregistro item : listaAsignacionRegistros) {
-				listaRegistro.add(new Registro(item.getInventario().getIdinventario(),item.getInventario().getFolio(),item.getInventario().getFechacreacion().toString(),item.getInventario().getProyecto(),item.getInventario().getEstatus()));
-			}
+			listaRegistro = listaAsignacionRegistros;
+
 		}
 		
 		

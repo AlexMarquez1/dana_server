@@ -42,8 +42,8 @@ import org.springframework.scheduling.annotation.Async;
 import com.isae.web.dao.IValoresDAO;
 import com.isae.web.entity.AsistenciaUsuario;
 import com.isae.web.entity.Camposproyecto;
+import com.isae.web.entity.Inventario;
 import com.isae.web.entity.Proyecto;
-import com.isae.web.entity.Registro;
 import com.isae.web.entity.ReporteAsistencia;
 import com.isae.web.entity.Valore;
 import com.isae.web.entity.VistaDatosISSSTE;
@@ -1301,7 +1301,7 @@ public class GenerarDocumentosUtils {
 
 	@Async("threadPoolTaskExecutor")
 	public ByteArrayInputStream generarExcelRegistros(List<Proyecto> listaProyectos,
-			Map<String, List<Camposproyecto>> camposProyecto, Map<String, List<Registro>> registros,
+			Map<String, List<Camposproyecto>> camposProyecto, Map<String, List<Inventario>> registros,
 			IValoresDAO valoresDAO) throws IOException {
 		
 		
@@ -1358,9 +1358,9 @@ public class GenerarDocumentosUtils {
 
 				Row rowDatos = sheet.createRow(celda++);
 				Cell dato = rowDatos.createCell(0);
-				for (Registro registro : registros.get(proyecto.getProyecto())) {
+				for (Inventario registro : registros.get(proyecto.getProyecto())) {
 
-					List<Valore> valores = valoresDAO.obtenerDatosCampoPorProyecto(registro.getIdRegistro(),
+					List<Valore> valores = valoresDAO.obtenerDatosCampoPorProyecto(registro.getIdinventario(),
 							proyecto.getIdproyecto());
 
 					for (int i = 0; i < valores.size(); i++) {

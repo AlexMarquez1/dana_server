@@ -22,7 +22,6 @@ import com.isae.web.entity.Campos;
 import com.isae.web.entity.Camposproyecto;
 import com.isae.web.entity.Inventario;
 import com.isae.web.entity.Proyecto;
-import com.isae.web.entity.Registro;
 import com.isae.web.entity.Usuario;
 import com.isae.web.entity.Valore;
 import com.isae.web.entity.ValoresCampo;
@@ -165,8 +164,8 @@ public class ValoresRestController {
 	
 	@CrossOrigin(origins = "*")
 	@PostMapping("/obtener/valores/campos/busqueda")
-	public List<Registro> obtenerValoresCampos(@RequestBody Map<String,Object> busqueda){
-		List<Registro> respuesta = new ArrayList<>();
+	public List<Inventario> obtenerValoresCampos(@RequestBody Map<String,Object> busqueda){
+		List<Inventario> respuesta = new ArrayList<>();
 		
 		int idProyecto =Integer.parseInt(busqueda.get("idproyecto").toString());
 		String campo = busqueda.get("campo").toString();
@@ -180,7 +179,7 @@ public class ValoresRestController {
 		for(Object item : respuestaBusqueda) {
 			Object [] inventario  = (Object[]) item;
 			Proyecto  proyectoAux = this.proyecto.findById((int) inventario[2]).get();
-			respuesta.add(new Registro( (int) inventario[0], (String) inventario[1], ((Date) inventario[3]).toString(), proyectoAux, (String) inventario[4]));
+			respuesta.add(new Inventario((int) inventario[0], (Date) inventario[3], (String) inventario[1], (String) inventario[4], proyectoAux));
 		}
 		
 		
@@ -192,8 +191,8 @@ public class ValoresRestController {
 	
 	@CrossOrigin(origins = "*")
 	@PostMapping("/obtener/valores/campos/busqueda/usuarios")
-	public List<Registro> obtenerValoresCamposPorUsuarios(@RequestBody Map<String,Object> busqueda){
-		List<Registro> respuesta = new ArrayList<>();
+	public List<Inventario> obtenerValoresCamposPorUsuarios(@RequestBody Map<String,Object> busqueda){
+		List<Inventario> respuesta = new ArrayList<>();
 		
 		int idProyecto =Integer.parseInt(busqueda.get("idproyecto").toString());
 		String campo = busqueda.get("campo").toString();
@@ -213,7 +212,7 @@ public class ValoresRestController {
 		for(Object item : respuestaBusqueda) {
 			Object [] inventario  = (Object[]) item;
 			Proyecto  proyectoAux = this.proyecto.findById((int) inventario[2]).get();
-			respuesta.add(new Registro( (int) inventario[0], (String) inventario[1], ((Date) inventario[3]).toString(), proyectoAux, (String) inventario[4]));
+			respuesta.add(new Inventario((int) inventario[0], (Date) inventario[3], (String) inventario[1], (String) inventario[4], proyectoAux));
 		}
 		
 		
