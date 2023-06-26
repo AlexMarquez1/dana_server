@@ -164,6 +164,16 @@ public class CamposProyectoRestController {
 		return campos;
 	}
 	
+	@CrossOrigin(origins = "*")
+	@PostMapping("/obtener/campos/proyectos")
+	public List<Camposproyecto> obtenerCamposBusquedaProyectos(@RequestBody List<Proyecto> proyectos) {
+		
+		List<Camposproyecto> listaRespuesta = this.camposProyecto.obtenerCatalogoCampoPorProyecto(proyectos);
+		
+		
+		return listaRespuesta;
+	}
+	
 	
 	
 	

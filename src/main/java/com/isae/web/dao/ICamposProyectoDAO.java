@@ -12,6 +12,7 @@ import org.springframework.stereotype.Repository;
 import org.springframework.stereotype.Service;
 
 import com.isae.web.entity.Camposproyecto;
+import com.isae.web.entity.Proyecto;
 
 
 @Repository
@@ -22,6 +23,9 @@ public interface ICamposProyectoDAO extends JpaRepository<Camposproyecto, Intege
 	
 	@Query(value= "SELECT * FROM camposproyecto WHERE idproyecto = :idProyecto ORDER BY idcamposproyecto ASC", nativeQuery = true)
 	List<Camposproyecto> obtenerCatalogoCampoPorProyecto(@Param("idProyecto") int idProyecto);
+	
+	@Query(value= "SELECT c FROM Camposproyecto c WHERE c.proyecto IN :proyectos ORDER BY c.idcamposproyecto ASC")
+	List<Camposproyecto> obtenerCatalogoCampoPorProyecto(@Param("proyectos") List<Proyecto> proyectos);
 	
 	@Query(value= "SELECT * FROM camposproyecto WHERE idproyecto = :idProyecto AND tipocampo = 'FIRMA'", nativeQuery = true)
 	List<Camposproyecto> obtenerFirmasPorProyecto(@Param("idProyecto") int idProyecto);

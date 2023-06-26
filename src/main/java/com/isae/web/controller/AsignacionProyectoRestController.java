@@ -2,17 +2,23 @@ package com.isae.web.controller;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
+import com.google.common.reflect.TypeToken;
+import com.google.gson.Gson;
 import com.isae.web.dao.IAsignacionProyectoDAO;
 import com.isae.web.dao.IAsignarRegistroDAO;
 import com.isae.web.dao.IInventarioDAO;
+import com.isae.web.entity.Agrupaciones;
 import com.isae.web.entity.Asignacionproyecto;
 import com.isae.web.entity.Asignacionregistro;
 import com.isae.web.entity.Inventario;
@@ -72,6 +78,13 @@ public class AsignacionProyectoRestController {
 		}
 		return listaProyectos;
 	}
+	@CrossOrigin(origins = "*")
+	@PostMapping("/obtener/proyectos/asignados/usuarios")
+	public List<Proyecto> getProyectosAsignadosPorUsuarios(@RequestBody List<Usuario> listaUsuarios) {
+		List<Proyecto> lista = this.asignacionProyecto.obtenerProyectosAsignados(listaUsuarios);
+		
+		return lista;
+	}
 	
 	@CrossOrigin(origins = "*")
 	@GetMapping("/obtener/registros/asignados/{idusuario}")
@@ -105,5 +118,20 @@ public class AsignacionProyectoRestController {
 		
 		
 		return listaRegistro;
+	}
+	
+	@CrossOrigin(origins = "*")
+	@PostMapping("/obtener/registros/asignados/usuario/proyecto")
+	public List<Inventario> getRegistrosAsignadosUsuariosProyectos(@RequestBody Map<String,Object> contenido) {
+		List<Inventario> listaAsignacionRegistros = new ArrayList<Inventario>();
+		Gson gson = new Gson();
+		String json = gson.toJson(contenido.get("usuarios"));
+		
+		List<Usuario> listaUsuarios = gson.fromJson(json, new TypeToken<List<Usuario>>(){}.getType());
+		json = gson.toJson(contenido.get("proyectos"));
+		List<Proyecto> listaProyectos = gson.fromJson(json, new TypeToken<List<Proyecto>>(){}.getType());
+		
+			listaAsignacionRegistros = this.asignarRegistro.obtenerRegistrosAsignadosUsuarioProyecto(listaUsuarios, listaProyectos);
+		return listaAsignacionRegistros;
 	}
 }

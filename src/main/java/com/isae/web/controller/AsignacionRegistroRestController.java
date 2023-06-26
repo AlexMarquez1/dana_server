@@ -87,7 +87,7 @@ public class AsignacionRegistroRestController {
 		return lista;
 	}
 	
-	@Async("threadPoolTaskExecutor")
+//	@Async("threadPoolTaskExecutor")
 	@CrossOrigin(origins = "*")
 	@GetMapping("/obtener/registros/estatus/proyecto/usuario/{idproyecto}/{idusuario}")
 	public Map<String, Object> obtenerRegistrosPorProyectoYEstatus(

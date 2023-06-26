@@ -14,6 +14,8 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
+import com.google.common.reflect.TypeToken;
+import com.google.gson.Gson;
 import com.isae.web.dao.ICamposProyectoDAO;
 import com.isae.web.dao.IInventarioDAO;
 import com.isae.web.dao.IProyectoDAO;
@@ -230,6 +232,28 @@ public class ValoresRestController {
 		Camposproyecto campoProyecto = this.camposProyecto.obtenerCampoProyectoPorProyecto(Integer.parseInt(idproyecto), tipoBusqueda);
 		
 		respuesta = this.valores.obtenerValoresPorCampoProyecto(Integer.parseInt(idproyecto),campoProyecto.getIdcamposproyecto(), Integer.parseInt(idusuario));
+		
+		return respuesta;
+	}
+	
+	@CrossOrigin(origins = "*")
+	@PostMapping("/obtener/valores/busqueda")
+	public List<Valore> obtenerValoresBusqueda(@RequestBody Map<String,Object> contenido){
+		List<Valore> respuesta = new ArrayList<Valore>();
+		
+		Gson gson = new Gson();
+		String json = gson.toJson(contenido.get("campo"));
+		
+		Camposproyecto campoProyecto = gson.fromJson(json, new TypeToken<Camposproyecto>(){}.getType());
+		
+		json = gson.toJson(contenido.get("usuarios"));
+		List<Usuario> listaUsuarios = gson.fromJson(json, new TypeToken<List<Usuario>>(){}.getType());
+		
+		json = gson.toJson(contenido.get("proyecto"));
+		
+		List<Proyecto> proyecto = gson.fromJson(json, new TypeToken<List<Proyecto>>(){}.getType());
+		
+		respuesta = this.valores.obtenerValoresPorCampoProyecto(proyecto.get(0), campoProyecto, listaUsuarios);
 		
 		return respuesta;
 	}

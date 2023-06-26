@@ -113,16 +113,18 @@ public class ProyectoRestController {
 
 	@CrossOrigin(origins = "*")
 	@PostMapping("/crear/proyecto/{proyecto}/{tipoproyecto}")
-	public List<String> ingresarProyecto(@RequestBody List<Agrupaciones> agrupaciones,
+	public String ingresarProyecto(@RequestBody List<Agrupaciones> agrupaciones,
 			@PathVariable(value = "proyecto") String nombreProyecto,
 			@PathVariable(value = "tipoproyecto") String tipoProyecto) {
-
+		String respuesta = "";
 		List<String> agrupacionesAux = new ArrayList<String>();
 		List<String> catalogosAIngresar = new ArrayList<String>();
 		List<String> listaTipo = new ArrayList<String>();
 		List<Agrupacion> agrupacionesAIngresar = new ArrayList<Agrupacion>();
 		List<Tipocatalogo> listaTipoCatalogoIngresar = new ArrayList<Tipocatalogo>();
 		List<Camposproyecto> listaCamposProyecto = new ArrayList<Camposproyecto>();
+		
+		System.out.println(agrupaciones);
 
 		proyecto.ingresarProyecto(nombreProyecto.toUpperCase(), tipoProyecto.toUpperCase());
 
@@ -192,8 +194,9 @@ public class ProyectoRestController {
 
 		System.out.println(listaCamposProyecto);
 		camposProyecto.saveAll(listaCamposProyecto);
+		respuesta = "Se guardo el proyecto exitosamente";
 
-		return new ArrayList<String>();
+		return respuesta;
 	}
 
 	@CrossOrigin(origins = "*")
@@ -238,6 +241,54 @@ public class ProyectoRestController {
 		respuesta = "Correcto";
 
 		System.out.println("Se elimino el proyecto correctamente");
+
+		return respuesta;
+
+	}
+	
+	@CrossOrigin(origins = "*")
+	@PostMapping("/eliminar/proyecto/{password}")
+	public Map<String,String> eliminarProyectoPassword(@RequestBody Proyecto proyecto,@PathVariable(value = "password") String password) {
+		Map<String,String> respuesta = new HashMap<String,String>();
+		
+		if(password.equals("eliminarproyecto170313")) {
+			List<Inventario> listaInventarios = this.inventario.obtenerPorIdProyecto(proyecto.getIdproyecto());
+
+			for (Inventario inventario : listaInventarios) {
+
+				this.valores.eliminarPoridInventario(inventario.getIdinventario());
+				this.evidencia.eliminarPoridInventario(inventario.getIdinventario());
+				this.firma.eliminarPoridInventario(inventario.getIdinventario());
+				this.pendiente.eliminarInventario(inventario.getIdinventario());
+				this.enProceso.eliminarInventario(inventario.getIdinventario());
+				this.edicionAsignada.eliminarPorInventario(inventario.getIdinventario());
+				this.documentoGenerado.eliminarPoridInventario(inventario.getIdinventario());
+				this.asignarRegistros.eliminarPoridInventario(inventario.getIdinventario());
+
+			}
+
+			List<Catalogo> listaCatalogos = this.catalogo.obtenerCatalogosPorProyecto(proyecto.getIdproyecto());
+			for (Catalogo catalogo : listaCatalogos) {
+				this.catalogoRelacionado.eliminarPorPadreOHijo(catalogo.getIdcatalogo(), catalogo.getIdcatalogo());
+
+			}
+
+			this.catalogo.eliminarPorProyecto(proyecto.getIdproyecto());
+			this.camposProyecto.eliminarPoridProyecto(proyecto.getIdproyecto());
+
+			this.inventario.deleteAll(listaInventarios);
+			this.asignacionProyecto.eliminarPoridProyecto(proyecto.getIdproyecto());
+
+			this.proyecto.eliminarPoridProyecto(proyecto.getIdproyecto());
+
+			respuesta.put("Respuesta", "Proyecto eliminado");
+			System.out.println("Proyecto eliminado: " + proyecto);
+
+			System.out.println("Se elimino el proyecto correctamente");
+		}else {
+			System.out.println("La contraseña es incorrecta" + proyecto);
+			respuesta.put("Respuesta", "La contraseña no coinside");
+		}
 
 		return respuesta;
 
