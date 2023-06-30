@@ -230,7 +230,7 @@ public class UsuarioRestController {
 	@PostMapping("/editar/usuario")
 	public List<String> editarUsuario(@RequestBody Usuario usuario) {
 		List<String> respuesta = new ArrayList<>();
-
+		
 		this.usuario.save(usuario);
 
 		respuesta.add("correcto");

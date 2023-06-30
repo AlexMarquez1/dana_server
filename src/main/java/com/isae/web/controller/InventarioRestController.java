@@ -972,42 +972,55 @@ public class InventarioRestController {
             listaAgrupaciones = gson.fromJson(json, new TypeToken<List<Agrupaciones>>(){}.getType());
             
             //TODO: Actualizando valores
-            for(Campos campo : listaAgrupaciones.get(indAgrupacion).getCampos() ) {
-            	if(campo.getAgrupacion().equalsIgnoreCase("DATOS DEL REGISTRO")) {
-            		inventario.setFolio(campo.getValor());
-            		this.inventario.cambiarFolio(campo.getValor(), inventario.getIdinventario());
+            if(indAgrupacion != 0) {
+            	 for(Campos campo : listaAgrupaciones.get(indAgrupacion).getCampos() ) {
+                 	if(campo.getAgrupacion().equalsIgnoreCase("DATOS DEL REGISTRO")) {
+                 		inventario.setFolio(campo.getValor());
+                 		this.inventario.cambiarFolio(campo.getValor(), inventario.getIdinventario());
+                 	}
+                 	
+                 	if(!campo.getTipoCampo().equals("FOTO") || !campo.getTipoCampo().equals("CHECKBOX-EVIDENCIA") || !campo.getTipoCampo().equals("FIRMA")) {            		
+                 		this.valores.actualizarValorEHistorial(campo.getIdCampo(), usuario.getIdusuario(), inventario.getIdinventario(), campo.getValor());
+                 	}
+                 	
+                 }
+            }else {
+            	for(int i =0; i < listaAgrupaciones.size(); i++) {
+            		 for(Campos campo : listaAgrupaciones.get(i).getCampos() ) {
+                      	if(campo.getAgrupacion().equalsIgnoreCase("DATOS DEL REGISTRO")) {
+                      		inventario.setFolio(campo.getValor());
+                      		this.inventario.cambiarFolio(campo.getValor(), inventario.getIdinventario());
+                      	}
+                      	
+                      	if(!campo.getTipoCampo().equals("FOTO") || !campo.getTipoCampo().equals("CHECKBOX-EVIDENCIA") || !campo.getTipoCampo().equals("FIRMA")) {            		
+                      		this.valores.actualizarValorEHistorial(campo.getIdCampo(), usuario.getIdusuario(), inventario.getIdinventario(), campo.getValor());
+                      	}
+                      	
+                      }
             	}
-            	
-            	if(!campo.getTipoCampo().equals("FOTO") || !campo.getTipoCampo().equals("CHECKBOX-EVIDENCIA") || !campo.getTipoCampo().equals("FIRMA")) {            		
-            		this.valores.actualizarValorEHistorial(campo.getIdCampo(), usuario.getIdusuario(), inventario.getIdinventario(), campo.getValor());
-            	}
-            	
             }
             
             if(request.get("firmas") != null) {
-            	System.out.println("Datos con Firmas");
-            	json= gson.toJson(request.get("firmas"));
-            	listaFirmas = gson.fromJson(json, new TypeToken<List<Firma>>(){}.getType());
-            	System.out.println("Cantidad de Firmas: " +listaFirmas.size());
-            	for(Firma firma : listaFirmas) {
-            		actualizarFirma(firma,usuario.getIdusuario());
-            	}
-            }
-            if(request.get("fotos") != null) {
-            	System.out.println("Datos con Fotos");
-            	json = gson.toJson(request.get("fotos"));
-            	listaFotos = gson.fromJson(json, new TypeToken<List<Evidencia>>(){}.getType());
-            	actualizarEvidencia(usuario.getIdusuario(),listaFotos);
-            }
-            if(request.get("evidencias") != null) {
-            	System.out.println("Datos con Evidencias");
-            	json = gson.toJson(request.get("evidencias"));
-            	listaEvidencias = gson.fromJson(json, new TypeToken<List<Evidencia>>(){}.getType());
-            	actualizarEvidencia(usuario.getIdusuario(),listaEvidencias);
-            }
-            
-            
-        	
+             	System.out.println("Datos con Firmas");
+             	json= gson.toJson(request.get("firmas"));
+             	listaFirmas = gson.fromJson(json, new TypeToken<List<Firma>>(){}.getType());
+             	System.out.println("Cantidad de Firmas: " +listaFirmas.size());
+             	for(Firma firma : listaFirmas) {
+             		actualizarFirma(firma,usuario.getIdusuario());
+             	}
+             }
+             if(request.get("fotos") != null) {
+             	System.out.println("Datos con Fotos");
+             	json = gson.toJson(request.get("fotos"));
+             	listaFotos = gson.fromJson(json, new TypeToken<List<Evidencia>>(){}.getType());
+             	actualizarEvidencia(usuario.getIdusuario(),listaFotos);
+             }
+             if(request.get("evidencias") != null) {
+             	System.out.println("Datos con Evidencias");
+             	json = gson.toJson(request.get("evidencias"));
+             	listaEvidencias = gson.fromJson(json, new TypeToken<List<Evidencia>>(){}.getType());
+             	actualizarEvidencia(usuario.getIdusuario(),listaEvidencias);
+             }
         
         
         } catch (Exception e) {
@@ -1027,6 +1040,8 @@ public class InventarioRestController {
 	
 		nuevaFirma.setInventario(this.inventario.findById(nuevaFirma.getInventario().getIdinventario()).get());
 		
+		File archivoAnterior = null;
+		
 		byte[] firmaByte = new byte[firma.getFirma().size()];
 
 		int ind =0;
@@ -1044,7 +1059,8 @@ public class InventarioRestController {
 					
 			if(!lista.isEmpty()) {
 				firmaAnterior = lista.get(0).getUrl();
-				mismaFirma = compararImagenes(firmaFile.getPath(),descargarArchivo(new URL(firmaAnterior), "firmaAnterior.png"));
+				archivoAnterior = new File(descargarArchivo(new URL(firmaAnterior), "firmaAnterior.png"));
+				mismaFirma = compararImagenes(firmaFile.getPath(),archivoAnterior.getPath());
 			}
 			
 			
@@ -1065,12 +1081,10 @@ public class InventarioRestController {
 					if(mismaFirma) {
 						System.out.println("La firma es la misma");
 					}else {
-						//TODO: aun no guarda el historico correctamente
 						System.out.println("La firma es diferente");
-						System.out.println("IdCampoProyecto: "+ firma.getCamposProyecto().getIdcamposproyecto() + " IdInventario: " + firma.getInventario().getIdinventario() + " ValorN: "+ urlFirma + " ValorAnt: " + firmaAnterior);
-						String urlHistorico = guardarEvidencia(nuevaFirma.getInventario(), firmaFile,
+						String urlHistorico = guardarEvidencia(nuevaFirma.getInventario(), archivoAnterior,
 								firma.getNombreFirma()+"-"+ new Date(), "Historico");
-						this.valores.actualizarHistorial(firma.getCamposProyecto().getIdcamposproyecto(), idUsuario, firma.getInventario().getIdinventario(), urlHistorico,firmaAnterior);
+						this.valores.actualizarHistorial(firma.getCamposProyecto().getIdcamposproyecto(), idUsuario, firma.getInventario().getIdinventario(), urlFirma,urlHistorico);
 					}
 				}
 			}else {
@@ -1094,9 +1108,6 @@ public class InventarioRestController {
 		return respuesta;
 		
 	}
-	
-//	https://firebasestorage.googleapis.com/v0/b/isae-de6da.appspot.com/o/Proyectos%2F66-FIRMAS%2F148549-PRUEBA%20HISTORIAL-FIRMAS-18%2FFirmas%2FFIRMA%20TECNICO?alt=media&token=FIRMATECNICO.png 
-//	https://firebasestorage.googleapis.com/v0/b/isae-de6da.appspot.com/o/Proyectos%2F66-FIRMAS%2F148549-PRUEBA%20HISTORIAL-FIRMAS-18%2FFirmas%2FFIRMA%20TECNICO?alt=media&token=FIRMATECNICO.png
 	
 	public static boolean compararImagenes(String rutaImagen1, String rutaImagen2) {
        boolean iguales = true;
@@ -1149,6 +1160,7 @@ public class InventarioRestController {
 					new Usuario(idUsuario), evidencia.getInventario(), evidencia.getCamposProyecto());
 
 			nuevaEvidencia.setInventario(this.inventario.findById(nuevaEvidencia.getInventario().getIdinventario()).get());
+			File archivoAnterior = null;
 
 			byte[] evidenciaByte = new byte[evidencia.getEvidencia().size()];
 
@@ -1167,7 +1179,8 @@ public class InventarioRestController {
 				
 				if(!lista.isEmpty()) {
 					evidenciaAnterior = lista.get(0).getUrl();
-					mismaEvidencia = compararImagenes(evidenciaFile.getPath(),descargarArchivo(new URL(evidenciaAnterior), "firmaAnterior.png"));
+					archivoAnterior = new File(descargarArchivo(new URL(evidenciaAnterior), "EvidenciaAnterior.png"));
+					mismaEvidencia = compararImagenes(evidenciaFile.getPath(),archivoAnterior.getPath());
 				}
 
 				String urlEvidencia = guardarEvidencia(nuevaEvidencia.getInventario(), evidenciaFile,
@@ -1185,7 +1198,9 @@ public class InventarioRestController {
 						System.out.println("La evidencia es la misma");
 					}else {
 						System.out.println("La evidencia es diferente");
-						this.valores.actualizarHistorial(nuevaEvidencia.getCampoProyecto().getIdcamposproyecto(), idUsuario, nuevaEvidencia.getInventario().getIdinventario(), urlEvidencia,evidenciaAnterior);
+						String urlHistorico = guardarEvidencia(nuevaEvidencia.getInventario(), archivoAnterior,
+								nuevaEvidencia.getNombrefoto()+"-"+ new Date(), "Historico");
+						this.valores.actualizarHistorial(nuevaEvidencia.getCampoProyecto().getIdcamposproyecto(), idUsuario, nuevaEvidencia.getInventario().getIdinventario(), urlEvidencia,urlHistorico);
 					}
 				} else {
 					

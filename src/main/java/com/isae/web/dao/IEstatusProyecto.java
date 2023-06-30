@@ -12,7 +12,7 @@ import com.isae.web.entity.EstatusProyecto;
 @Repository
 public interface IEstatusProyecto extends JpaRepository<EstatusProyecto, Integer> {
 	
-	@Query(value ="SELECT * FROM estatusproyecto WHERE idproyecto =:idproyecto", nativeQuery = true)
+	@Query(value ="SELECT * FROM estatusproyecto WHERE idproyecto =:idproyecto ORDER BY orden ASC", nativeQuery = true)
 	List<EstatusProyecto> obtenerEstatusPorProyecto(@Param("idproyecto") int idproyecto);
 	
 }

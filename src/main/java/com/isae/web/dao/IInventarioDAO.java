@@ -13,6 +13,8 @@ import org.springframework.stereotype.Repository;
 import org.springframework.stereotype.Service;
 
 import com.isae.web.entity.Inventario;
+import com.isae.web.entity.Proyecto;
+import com.isae.web.entity.Usuario;
 
 
 @Repository
@@ -55,7 +57,7 @@ public interface IInventarioDAO extends JpaRepository<Inventario,Integer>{
 	@Query(value="SELECT estatus, COUNT(estatus) FROM `inventario` WHERE idproyecto =:idproyecto GROUP BY estatus", nativeQuery= true)
 	List<Object> obtenerTotalEstatusProyecto(@Param("idproyecto") int idproyecto);
 	
-	@Query(value="SELECT inventario.estatus, COUNT(inventario.estatus) FROM `asignacionregistro` INNER JOIN inventario ON inventario.idinventario = asignacionregistro.idinventario WHERE inventario.idproyecto =:idproyecto AND asignacionregistro.idusuario =:idusuario GROUP BY inventario.estatus", nativeQuery= true)
-	List<Object> obtenerTotalEstatusProyectoAsignados(@Param("idproyecto") int idproyecto, @Param("idusuario") int idusuario);
+	@Query(value="SELECT i.estatus, COUNT(i.estatus) AS total FROM Asignacionregistro a INNER JOIN a.inventario i WHERE i.proyecto =:proyecto AND a.usuario =:usuario GROUP BY i.estatus ORDER BY total DESC")
+	List<Object> obtenerTotalEstatusProyectoAsignados(@Param("proyecto") Proyecto idproyecto, @Param("usuario") Usuario idusuario);
 	
 }

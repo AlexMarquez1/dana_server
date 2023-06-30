@@ -30,6 +30,8 @@ public class Usuario implements Serializable {
 
 	private String usuario;
 	
+	private String status;
+	
 	private String token;
 
 	//bi-directional many-to-one association to Perfile
@@ -137,6 +139,14 @@ public class Usuario implements Serializable {
 	public void setPerfile(Perfile perfile) {
 		this.perfiles = perfile;
 	}
+	
+	public String getStatus() {
+		return status;
+	}
+
+	public void setStatus(String status) {
+		this.status = status;
+	}
 
 	public String getToken() {
 		return token;
@@ -150,10 +160,8 @@ public class Usuario implements Serializable {
 	public String toString() {
 		return "Usuario [idusuario=" + idusuario + ", correo=" + correo + ", jefeinmediato=" + jefeinmediato
 				+ ", nombre=" + nombre + ", pass=" + pass + ", passtemp=" + passtemp + ", telefono=" + telefono
-				+ ", ubicacion=" + ubicacion + ", usuario=" + usuario + ", token=" + token + ", perfiles=" + perfiles
-				+ "]";
-	}
-	
-	
+				+ ", ubicacion=" + ubicacion + ", usuario=" + usuario + ", status=" + status + ", token=" + token
+				+ ", perfiles=" + perfiles + "]";
+	}	
 
 }

@@ -222,7 +222,7 @@ public class ObtenerDatosController {
 
 	private List<Fotoevidencia> obtenerCantidadCheckBoxEvidencia(String idProyecto, String idInventario) {
 		List<Camposproyecto> lista = this.camposProyecto
-				.obtenerCheckBoxEvidenciaPorProyecto(Integer.parseInt(idProyecto));
+				.obtenerSoloCheckBoxEvidenciaPorProyecto(Integer.parseInt(idProyecto));
 
 		List<Fotoevidencia> evidencias = new ArrayList<Fotoevidencia>();
 		for (Camposproyecto item : lista) {
@@ -242,7 +242,7 @@ public class ObtenerDatosController {
 				}
 			}
 		}
-		System.out.println(evidencias.size());
+		System.out.println("Evidencias Checkbox: " + evidencias.size());
 		return evidencias;
 	}
 
