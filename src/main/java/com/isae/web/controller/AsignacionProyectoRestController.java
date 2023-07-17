@@ -121,6 +121,20 @@ public class AsignacionProyectoRestController {
 	}
 	
 	@CrossOrigin(origins = "*")
+	@PostMapping("/obtener/registros/proyecto")
+	public List<Inventario> getRegistrosPorProyecto(
+			@RequestBody Proyecto proyecto
+			) {
+		List<Inventario> listaRegistro = new ArrayList<Inventario>();
+		
+		listaRegistro = this.asignarRegistro.obtenerRegistrosPorProyectos(proyecto);
+		System.out.println("Lista de registros: "+ listaRegistro.size());
+		
+		
+		return listaRegistro;
+	}
+	
+	@CrossOrigin(origins = "*")
 	@PostMapping("/obtener/registros/asignados/usuario/proyecto")
 	public List<Inventario> getRegistrosAsignadosUsuariosProyectos(@RequestBody Map<String,Object> contenido) {
 		List<Inventario> listaAsignacionRegistros = new ArrayList<Inventario>();

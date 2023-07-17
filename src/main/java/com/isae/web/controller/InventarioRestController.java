@@ -25,13 +25,16 @@ import org.apache.commons.collections.map.HashedMap;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.IOUtils;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.MediaType;
 import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestPart;
 import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.multipart.MultipartFile;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -477,7 +480,7 @@ public class InventarioRestController {
 		List<Fotoevidencia> evidencias = new ArrayList<Fotoevidencia>();
 		for (Camposproyecto item : lista) {
 			evidencias.add(new Fotoevidencia(0, item.getCampo(), "", "",
-					new Usuario(0, "", "", "", "", 0, "", "", "", new Perfile()),
+					new Usuario(),
 					new Inventario(0, new Date(), "", "", new Proyecto(0, new Date(), "", new Tipoproyecto())),
 					new Camposproyecto(item.getIdcamposproyecto())));
 		}
@@ -499,7 +502,7 @@ public class InventarioRestController {
 		List<Fotoevidencia> evidencias = new ArrayList<Fotoevidencia>();
 		for (Camposproyecto item : lista) {
 			evidencias
-					.add(new Fotoevidencia(0, "", "", "", new Usuario(0, "", "", "", "", 0, "", "", "", new Perfile()),
+					.add(new Fotoevidencia(0, "", "", "", new Usuario(),
 							new Inventario(0, new Date(), "", "",
 									new Proyecto(0, new Date(), "", new Tipoproyecto(0, ""))),
 							new Camposproyecto(item.getIdcamposproyecto(), "", item.getCampo(),"", "", 0, "", "",
@@ -1021,6 +1024,107 @@ public class InventarioRestController {
              	listaEvidencias = gson.fromJson(json, new TypeToken<List<Evidencia>>(){}.getType());
              	actualizarEvidencia(usuario.getIdusuario(),listaEvidencias);
              }
+        
+        
+        } catch (Exception e) {
+//            e.printStackTrace();
+            System.out.println(e);
+        }
+        return respuesta;
+	}
+	
+	@CrossOrigin(origins = "*")
+	@PostMapping(value = "/inventario/actualizar/valores/nuevo", consumes = MediaType.MULTIPART_FORM_DATA_VALUE )
+	public List<String> registrarCambiosMovil(
+			@RequestPart("data") Object body,
+            @RequestPart("firmas") MultipartFile[] firmas
+            //@RequestPart("fotos") MultipartFile[] fotos,
+            //@RequestPart("evidencia") MultipartFile[] evidencia
+            ) {
+		List<String> respuesta = new ArrayList<String>();
+		respuesta.add("listo");
+		ObjectMapper objectMapper = new ObjectMapper();
+		int indAgrupacion = 0;
+		Usuario usuario;
+		Inventario inventario;
+		List<Agrupaciones> listaAgrupaciones;
+		List<Firma> listaFirmas;
+		List<Evidencia> listaFotos;
+		String estatus;
+		List<Evidencia> listaEvidencias;
+		
+        try {
+        	
+        	Map<String, Object> request = objectMapper.convertValue(body, Map.class);
+        	System.out.println(request);
+        	System.out.println(firmas);
+        	//System.out.println(fotos.length);
+        	//System.out.println(evidencia.length);
+        	
+//        	Gson gson = new Gson();
+//            String json = gson.toJson(request.get("usuario"));
+//        	
+//            usuario = gson.fromJson(json, new TypeToken<Usuario>(){}.getType());
+//            
+//            json = gson.toJson(request.get("inventario"));
+//            
+//            inventario = gson.fromJson(json, new TypeToken<Inventario>(){}.getType());
+//            
+//            indAgrupacion = (int) request.get("ind");
+//            estatus = (String) request.get("estatus");
+//            json = gson.toJson(request.get("listaAgrupaciones"));
+//            listaAgrupaciones = gson.fromJson(json, new TypeToken<List<Agrupaciones>>(){}.getType());
+//            
+//            //TODO: Actualizando valores
+//            if(indAgrupacion != 0) {
+//            	 for(Campos campo : listaAgrupaciones.get(indAgrupacion).getCampos() ) {
+//                 	if(campo.getAgrupacion().equalsIgnoreCase("DATOS DEL REGISTRO")) {
+//                 		inventario.setFolio(campo.getValor());
+//                 		this.inventario.cambiarFolio(campo.getValor(), inventario.getIdinventario());
+//                 	}
+//                 	
+//                 	if(!campo.getTipoCampo().equals("FOTO") || !campo.getTipoCampo().equals("CHECKBOX-EVIDENCIA") || !campo.getTipoCampo().equals("FIRMA")) {            		
+//                 		this.valores.actualizarValorEHistorial(campo.getIdCampo(), usuario.getIdusuario(), inventario.getIdinventario(), campo.getValor());
+//                 	}
+//                 	
+//                 }
+//            }else {
+//            	for(int i =0; i < listaAgrupaciones.size(); i++) {
+//            		 for(Campos campo : listaAgrupaciones.get(i).getCampos() ) {
+//                      	if(campo.getAgrupacion().equalsIgnoreCase("DATOS DEL REGISTRO")) {
+//                      		inventario.setFolio(campo.getValor());
+//                      		this.inventario.cambiarFolio(campo.getValor(), inventario.getIdinventario());
+//                      	}
+//                      	
+//                      	if(!campo.getTipoCampo().equals("FOTO") || !campo.getTipoCampo().equals("CHECKBOX-EVIDENCIA") || !campo.getTipoCampo().equals("FIRMA")) {            		
+//                      		this.valores.actualizarValorEHistorial(campo.getIdCampo(), usuario.getIdusuario(), inventario.getIdinventario(), campo.getValor());
+//                      	}
+//                      	
+//                      }
+//            	}
+//            }
+//            
+//            if(request.get("firmas") != null) {
+//             	System.out.println("Datos con Firmas");
+//             	json= gson.toJson(request.get("firmas"));
+//             	listaFirmas = gson.fromJson(json, new TypeToken<List<Firma>>(){}.getType());
+//             	System.out.println("Cantidad de Firmas: " +listaFirmas.size());
+//             	for(Firma firma : listaFirmas) {
+//             		actualizarFirma(firma,usuario.getIdusuario());
+//             	}
+//             }
+//             if(request.get("fotos") != null) {
+//             	System.out.println("Datos con Fotos");
+//             	json = gson.toJson(request.get("fotos"));
+//             	listaFotos = gson.fromJson(json, new TypeToken<List<Evidencia>>(){}.getType());
+//             	actualizarEvidencia(usuario.getIdusuario(),listaFotos);
+//             }
+//             if(request.get("evidencias") != null) {
+//             	System.out.println("Datos con Evidencias");
+//             	json = gson.toJson(request.get("evidencias"));
+//             	listaEvidencias = gson.fromJson(json, new TypeToken<List<Evidencia>>(){}.getType());
+//             	actualizarEvidencia(usuario.getIdusuario(),listaEvidencias);
+//             }
         
         
         } catch (Exception e) {

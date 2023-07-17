@@ -12,6 +12,7 @@ import org.springframework.stereotype.Repository;
 import org.springframework.stereotype.Service;
 
 import com.isae.web.entity.Asignacionproyecto;
+import com.isae.web.entity.Inventario;
 import com.isae.web.entity.Proyecto;
 import com.isae.web.entity.Usuario;
 
@@ -29,6 +30,7 @@ public interface IAsignacionProyectoDAO extends JpaRepository<Asignacionproyecto
 	
 	@Query(value= "SELECT p FROM Asignacionproyecto a INNER JOIN a.usuario u INNER JOIN a.proyecto p WHERE a.usuario IN :usuarios")
 	List<Proyecto> obtenerProyectosAsignados(@Param("usuarios") List<Usuario> listaUsuarios);
+	
 	
 	@Query(value= "SELECT inventario.folio FROM asignacionregistro INNER JOIN inventario ON asignacionregistro.idinventario = inventario.idinventario WHERE idusuario = :idUsuario", nativeQuery = true)
 	List<String> obtenerRegistroAsignado(@Param("idUsuario") int idUsuario);

@@ -58,6 +58,17 @@ public class AsignacionRegistroRestController {
 	}
 	
 	@CrossOrigin(origins = "*")
+	@PostMapping("/obtener/usuario/inventario")
+	public Usuario obtenerUsuarioPorInventario(
+			@RequestBody Inventario inventario) {
+		Usuario respuesta = new Usuario();
+		
+		respuesta = this.asignarRegistro.obtenerUsuarioPorInventario(inventario);
+
+		return respuesta;
+	}
+	
+	@CrossOrigin(origins = "*")
 	@GetMapping("/eliminar/asignacion/registro/{idUsuario}/{idRegistro}")
 	public List<String> eliminarAsignacionRegistro(
 			@PathVariable(value = "idUsuario") String idUsuario,

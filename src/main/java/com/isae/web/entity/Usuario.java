@@ -37,7 +37,11 @@ public class Usuario implements Serializable {
 	//bi-directional many-to-one association to Perfile
 	@OneToOne
 	@JoinColumn(name="perfil")
-	private Perfile perfiles;
+	private Perfile perfile;
+	
+	@OneToOne
+	@JoinColumn(name="idcliente")
+	private ClienteAplicacion clienteAplicacion;
 
 	public Usuario() {
 	}
@@ -45,9 +49,11 @@ public class Usuario implements Serializable {
 	public Usuario(int idusuario) {
 		this.idusuario = idusuario;
 	}
-
+	
 	public Usuario(int idusuario, String correo, String jefeinmediato, String nombre, String pass, int passtemp,
-			String telefono, String ubicacion, String usuario, Perfile perfiles) {
+			String telefono, String ubicacion, String usuario, String status, String token, Perfile perfile,
+			ClienteAplicacion clienteAplicacion) {
+		super();
 		this.idusuario = idusuario;
 		this.correo = correo;
 		this.jefeinmediato = jefeinmediato;
@@ -57,11 +63,31 @@ public class Usuario implements Serializable {
 		this.telefono = telefono;
 		this.ubicacion = ubicacion;
 		this.usuario = usuario;
-		this.perfiles = perfiles;
+		this.status = status;
+		this.token = token;
+		this.perfile = perfile;
+		this.clienteAplicacion = clienteAplicacion;
+	}
+
+	public Usuario(int idusuario, String correo, String jefeinmediato, String nombre, String pass, int passtemp,
+			String telefono, String ubicacion, String usuario, String status, String token, Perfile perfile) {
+		super();
+		this.idusuario = idusuario;
+		this.correo = correo;
+		this.jefeinmediato = jefeinmediato;
+		this.nombre = nombre;
+		this.pass = pass;
+		this.passtemp = passtemp;
+		this.telefono = telefono;
+		this.ubicacion = ubicacion;
+		this.usuario = usuario;
+		this.status = status;
+		this.token = token;
+		this.perfile = perfile;
 	}
 
 	public int getIdusuario() {
-		return this.idusuario;
+		return idusuario;
 	}
 
 	public void setIdusuario(int idusuario) {
@@ -69,7 +95,7 @@ public class Usuario implements Serializable {
 	}
 
 	public String getCorreo() {
-		return this.correo;
+		return correo;
 	}
 
 	public void setCorreo(String correo) {
@@ -77,7 +103,7 @@ public class Usuario implements Serializable {
 	}
 
 	public String getJefeinmediato() {
-		return this.jefeinmediato;
+		return jefeinmediato;
 	}
 
 	public void setJefeinmediato(String jefeinmediato) {
@@ -85,7 +111,7 @@ public class Usuario implements Serializable {
 	}
 
 	public String getNombre() {
-		return this.nombre;
+		return nombre;
 	}
 
 	public void setNombre(String nombre) {
@@ -93,7 +119,7 @@ public class Usuario implements Serializable {
 	}
 
 	public String getPass() {
-		return this.pass;
+		return pass;
 	}
 
 	public void setPass(String pass) {
@@ -101,7 +127,7 @@ public class Usuario implements Serializable {
 	}
 
 	public int getPasstemp() {
-		return this.passtemp;
+		return passtemp;
 	}
 
 	public void setPasstemp(int passtemp) {
@@ -109,7 +135,7 @@ public class Usuario implements Serializable {
 	}
 
 	public String getTelefono() {
-		return this.telefono;
+		return telefono;
 	}
 
 	public void setTelefono(String telefono) {
@@ -117,7 +143,7 @@ public class Usuario implements Serializable {
 	}
 
 	public String getUbicacion() {
-		return this.ubicacion;
+		return ubicacion;
 	}
 
 	public void setUbicacion(String ubicacion) {
@@ -125,21 +151,13 @@ public class Usuario implements Serializable {
 	}
 
 	public String getUsuario() {
-		return this.usuario;
+		return usuario;
 	}
 
 	public void setUsuario(String usuario) {
 		this.usuario = usuario;
 	}
 
-	public Perfile getPerfile() {
-		return this.perfiles;
-	}
-
-	public void setPerfile(Perfile perfile) {
-		this.perfiles = perfile;
-	}
-	
 	public String getStatus() {
 		return status;
 	}
@@ -156,12 +174,28 @@ public class Usuario implements Serializable {
 		this.token = token;
 	}
 
+	public Perfile getPerfile() {
+		return perfile;
+	}
+
+	public void setPerfile(Perfile perfile) {
+		this.perfile = perfile;
+	}
+
+	public ClienteAplicacion getClienteAplicacion() {
+		return clienteAplicacion;
+	}
+
+	public void setClienteAplicacion(ClienteAplicacion clienteAplicacion) {
+		this.clienteAplicacion = clienteAplicacion;
+	}
+
 	@Override
 	public String toString() {
 		return "Usuario [idusuario=" + idusuario + ", correo=" + correo + ", jefeinmediato=" + jefeinmediato
 				+ ", nombre=" + nombre + ", pass=" + pass + ", passtemp=" + passtemp + ", telefono=" + telefono
 				+ ", ubicacion=" + ubicacion + ", usuario=" + usuario + ", status=" + status + ", token=" + token
-				+ ", perfiles=" + perfiles + "]";
-	}	
+				+ ", perfile=" + perfile + ", clienteAplicacion=" + clienteAplicacion + "]";
+	}
 
 }

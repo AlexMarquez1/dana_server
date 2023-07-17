@@ -223,7 +223,7 @@ public class CamposProyectoRestController {
 			List<Fotoevidencia> evidencia = this.fotoEvidencia.obtenerFotoPorInventarioCampo(Integer.parseInt(idInventario),item.getIdcamposproyecto());
 			
 			if(evidencia.isEmpty()) {
-				evidencias.add(new Fotoevidencia(0,"","","",new Usuario(0,"","","","",0,"","","",new Perfile()),new Inventario(Integer.parseInt(idInventario),new Date(),"","",new Proyecto(0, new Date(),"",new Tipoproyecto(0, ""))),new Camposproyecto(item.getIdcamposproyecto(),"",item.getCampo(),"","",0,"","", new Agrupacion(), new Proyecto(),"")));
+				evidencias.add(new Fotoevidencia(0,"","","",new Usuario(),new Inventario(Integer.parseInt(idInventario),new Date(),"","",new Proyecto(0, new Date(),"",new Tipoproyecto(0, ""))),new Camposproyecto(item.getIdcamposproyecto(),"",item.getCampo(),"","",0,"","", new Agrupacion(), new Proyecto(),"")));
 			}else {
 				for(Fotoevidencia foto : evidencia) {
 					evidencias.add(foto);
@@ -247,7 +247,7 @@ public class CamposProyectoRestController {
 			List<Fotoevidencia> evidencia = this.fotoEvidencia.obtenerConcidencia(item.getCampo(), item.getIdcamposproyecto(), Integer.parseInt(idInventario));
 			
 			if(evidencia.isEmpty()) {
-				evidencias.add(new Fotoevidencia(0,item.getCampo(),"","",new Usuario(0,"","","","",0,"","","",new Perfile()),new Inventario(0,new Date(),"","", new Proyecto(0,new Date(),"", new Tipoproyecto())),new Camposproyecto(item.getIdcamposproyecto())));
+				evidencias.add(new Fotoevidencia(0,item.getCampo(),"","",new Usuario(),new Inventario(0,new Date(),"","", new Proyecto(0,new Date(),"", new Tipoproyecto())),new Camposproyecto(item.getIdcamposproyecto())));
 			}else {
 				evidencias.add(evidencia.get(0));
 			}
@@ -266,8 +266,7 @@ public class CamposProyectoRestController {
 		for(Camposproyecto campo : lista) {
 			List<Fotoevidencia> aux = this.fotoEvidencia.obtenerFotoPorInventarioCampo(Integer.parseInt(idinventario), campo.getIdcamposproyecto());
 			if(aux.isEmpty()) {
-				listaFotos.add(new Fotoevidencia(0,campo.getCampo(),"","", new Usuario(0, "", "", "", "", 0,"", "", "", 
-						new Perfile(0,"")),
+				listaFotos.add(new Fotoevidencia(0,campo.getCampo(),"","", new Usuario(),
 						new Inventario(0, new Date(), "", "", new Proyecto(0, new Date(), "", new Tipoproyecto(0,""))),
 						new Camposproyecto(0, "", "","", "",0,"","", new Agrupacion(0,""), new Proyecto(0, new Date(), "", new Tipoproyecto(0,"")),"")
 						));

@@ -201,7 +201,7 @@ public class ObtenerDatosController {
 
 			if (evidencia.isEmpty()) {
 				evidencias.add(new Fotoevidencia(0, item.getCampo(), "", "",
-						new Usuario(0, "", "", "", "", 0, "", "", "", new Perfile()),
+						new Usuario(),
 						new Inventario(0, new Date(), "", "", new Proyecto(0, new Date(), "", new Tipoproyecto())),
 						new Camposproyecto(item.getIdcamposproyecto())));
 			} else {
@@ -231,7 +231,7 @@ public class ObtenerDatosController {
 
 			if (evidencia.isEmpty()) {
 				evidencias.add(
-						new Fotoevidencia(0, "", "", "", new Usuario(0, "", "", "", "", 0, "", "", "", new Perfile()),
+						new Fotoevidencia(0, "", "", "", new Usuario(),
 								new Inventario(Integer.parseInt(idInventario), new Date(), "", "",
 										new Proyecto(0, new Date(), "", new Tipoproyecto(0, ""))),
 								new Camposproyecto(item.getIdcamposproyecto(), "",item.getCampo(),"", "",0, "", "",

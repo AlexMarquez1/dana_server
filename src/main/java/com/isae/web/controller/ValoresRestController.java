@@ -175,8 +175,13 @@ public class ValoresRestController {
 		int idUsuario = Integer.parseInt(busqueda.get("idusuario").toString());
 		
 		Camposproyecto campoProyecto = this.camposProyecto.obtenerCampoProyectoPorProyecto(idProyecto, campo);
+		List<Object> respuestaBusqueda = new ArrayList<Object>();
+		if(idUsuario == 0) {
+			respuestaBusqueda = this.valores.obtenerRespuestaBusquedaProyecto(idProyecto, campoProyecto.getIdcamposproyecto(), dato);
+		}else {
+			respuestaBusqueda = this.valores.obtenerRespuestaBusquedaProyecto(idProyecto, campoProyecto.getIdcamposproyecto(), dato, idUsuario);
+		}
 		
-		List<Object> respuestaBusqueda = this.valores.obtenerRespuestaBusquedaProyecto(idProyecto, campoProyecto.getIdcamposproyecto(), dato, idUsuario);
 		
 		for(Object item : respuestaBusqueda) {
 			Object [] inventario  = (Object[]) item;
@@ -231,7 +236,11 @@ public class ValoresRestController {
 		
 		Camposproyecto campoProyecto = this.camposProyecto.obtenerCampoProyectoPorProyecto(Integer.parseInt(idproyecto), tipoBusqueda);
 		
-		respuesta = this.valores.obtenerValoresPorCampoProyecto(Integer.parseInt(idproyecto),campoProyecto.getIdcamposproyecto(), Integer.parseInt(idusuario));
+		if(idusuario.equals("0")) {
+			respuesta = this.valores.obtenerValoresPorCampoProyecto(Integer.parseInt(idproyecto),campoProyecto.getIdcamposproyecto());
+		}else {
+			respuesta = this.valores.obtenerValoresPorCampoProyecto(Integer.parseInt(idproyecto),campoProyecto.getIdcamposproyecto(), Integer.parseInt(idusuario));
+		}
 		
 		return respuesta;
 	}

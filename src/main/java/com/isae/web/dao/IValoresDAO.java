@@ -79,11 +79,17 @@ public interface IValoresDAO extends JpaRepository<Valore, Integer> {
 	@Query(value = "SELECT valor FROM valores INNER JOIN inventario ON inventario.idinventario = valores.idinventario WHERE inventario.idproyecto = :idproyecto AND idcampoproyecto = :idcampoproyecto AND inventario.idinventario IN (SELECT idinventario FROM asignacionregistro WHERE idusuario =:idusuario)", nativeQuery = true)
 	List<String> obtenerValoresPorCampoProyecto(@Param("idproyecto") int idproyecto, @Param("idcampoproyecto") int idcampoproyecto, @Param("idusuario") int idusuario);
 	
+	@Query(value = "SELECT valor FROM valores INNER JOIN inventario ON inventario.idinventario = valores.idinventario WHERE inventario.idproyecto = :idproyecto AND idcampoproyecto = :idcampoproyecto", nativeQuery = true)
+	List<String> obtenerValoresPorCampoProyecto(@Param("idproyecto") int idproyecto, @Param("idcampoproyecto") int idcampoproyecto);
+	
 	@Query(value = "SELECT v FROM Valore v INNER JOIN v.inventario i WHERE i.proyecto=:proyecto AND v.camposproyecto =:campo AND v.inventario IN ( SELECT a.inventario FROM Asignacionregistro a WHERE a.usuario IN :usuarios)")
 	List<Valore> obtenerValoresPorCampoProyecto(@Param("proyecto") Proyecto proyecto, @Param("campo") Camposproyecto campo, @Param("usuarios") List<Usuario> usuarios);
 	
 	@Query(value = "SELECT inventario.idinventario, inventario.folio, proyecto.idproyecto, inventario.fechacreacion, inventario.estatus FROM valores INNER JOIN inventario ON inventario.idinventario = valores.idinventario INNER JOIN proyecto ON inventario.idproyecto = proyecto.idproyecto WHERE inventario.idproyecto = :idproyecto AND idcampoproyecto = :idcampoproyecto AND valores.valor LIKE CONCAT('%',:dato,'%')  AND inventario.idinventario IN (SELECT idinventario FROM asignacionregistro WHERE idusuario =:idusuario)", nativeQuery = true)
 	List<Object> obtenerRespuestaBusquedaProyecto(@Param("idproyecto") int idproyecto, @Param("idcampoproyecto") int idcampoproyecto, @Param("dato") String dato, @Param("idusuario") int idusuario);
+	
+	@Query(value = "SELECT inventario.idinventario, inventario.folio, proyecto.idproyecto, inventario.fechacreacion, inventario.estatus FROM valores INNER JOIN inventario ON inventario.idinventario = valores.idinventario INNER JOIN proyecto ON inventario.idproyecto = proyecto.idproyecto WHERE inventario.idproyecto = :idproyecto AND idcampoproyecto = :idcampoproyecto AND valores.valor LIKE CONCAT('%',:dato,'%')", nativeQuery = true)
+	List<Object> obtenerRespuestaBusquedaProyecto(@Param("idproyecto") int idproyecto, @Param("idcampoproyecto") int idcampoproyecto, @Param("dato") String dato);
 	
 	@Transactional
 	@Modifying
