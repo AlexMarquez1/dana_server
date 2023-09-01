@@ -1,5 +1,6 @@
 package com.isae.web.controller;
 
+import java.util.ArrayList;
 import java.util.List;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -42,5 +43,15 @@ public class ClienteRestController {
 	public List<Proyecto> obtenerProyectosPorCliente(@RequestBody Cliente cliente) {
 		
 		return this.asignacionCliente.obtenerProyectosPorCliente(cliente);
+	}
+	
+	@CrossOrigin(origins="*")
+	@PostMapping("/nuevo/cliente")
+	public List<String> nnuevoCliente(@RequestBody Cliente cliente) {
+		List<String> respuesta = new ArrayList<String>();
+		respuesta.add("Correcto");
+		System.out.println(cliente);
+		
+		return respuesta;
 	}
 }

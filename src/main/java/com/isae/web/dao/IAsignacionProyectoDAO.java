@@ -28,6 +28,9 @@ public interface IAsignacionProyectoDAO extends JpaRepository<Asignacionproyecto
 	@Query(value= "SELECT * FROM asignacionproyecto WHERE idusuario = :idUsuario", nativeQuery = true)
 	List<Asignacionproyecto> obtenerProyectosAsignados(@Param("idUsuario") int idUsuario);
 	
+	@Query("SELECT p FROM Asignacionproyecto a INNER JOIN a.proyecto p WHERE a.usuario = :usuario")
+	List<Proyecto> obtenerProyectosAsignados(@Param("usuario") Usuario usuario);
+	
 	@Query(value= "SELECT p FROM Asignacionproyecto a INNER JOIN a.usuario u INNER JOIN a.proyecto p WHERE a.usuario IN :usuarios")
 	List<Proyecto> obtenerProyectosAsignados(@Param("usuarios") List<Usuario> listaUsuarios);
 	
