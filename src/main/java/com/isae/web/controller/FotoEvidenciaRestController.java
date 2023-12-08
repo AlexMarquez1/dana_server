@@ -5,6 +5,7 @@ import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.UnsupportedEncodingException;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.net.URLConnection;
@@ -12,6 +13,12 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
+import java.net.URLDecoder;
+import java.nio.charset.StandardCharsets;
+
+
 
 import org.apache.commons.io.FileUtils;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -29,6 +36,7 @@ import com.google.cloud.storage.BlobId;
 import com.google.cloud.storage.BlobInfo;
 import com.google.cloud.storage.Storage;
 import com.google.cloud.storage.StorageOptions;
+import com.google.firebase.cloud.StorageClient;
 import com.isae.web.dao.IFotoEvidenciaDAO;
 import com.isae.web.dao.IInventarioDAO;
 import com.isae.web.entity.Evidencia;
@@ -194,6 +202,97 @@ public class FotoEvidenciaRestController {
 		this.fotoEvidencia.eliminarPoridInventarioIdCampo(Integer.parseInt(idinventario), Integer.parseInt(idcampo));
 		return "borrado";
 	}
+	
+	/*Nuevo método para eliminar las evidencias que son descartadas desde la página web --> Jonatan*/
+	@CrossOrigin(origins = "*")
+	@PostMapping("/eliminar/evidencias/web")
+	public String eliminarEvidenciasWeb(@RequestBody List<Integer> evidencias) {
+		
+		try{
+			URL url = new URL(
+				"https://firebasestorage.googleapis.com/v0/b/isae-de6da.appspot.com/o/Services%2Fgoogle-services.json?alt=media&token=142d6393-2405-44d4-bc20-6de945e391bc");
+		FileInputStream serviceAccount = new FileInputStream(descargarRecurso(url, "google-service-descarga.json"));
+		String bucketName = "isae-de6da.appspot.com";
+		for(int evidencia :evidencias) {
+			Fotoevidencia ftevidencia = this.fotoEvidencia.getById(evidencia);
+			String urlArchivoFirebase = obtenerRutaYNombre(ftevidencia.getUrl());
+			eliminarArchivoFirebase(serviceAccount, bucketName, urlArchivoFirebase);
+			this.fotoEvidencia.delete(ftevidencia);
+		}
+		
+		}catch(Exception ex) {
+			System.out.println(ex);
+		}
+		
+		
+		
+		return "Evidencias borradas";
+	}
+	
+	private static String obtenerRutaYNombre(String urlCompleta) {
+        // El patrón regular para extraer la ruta y el nombre del archivo sin incluir parámetros
+        String patron = "https://firebasestorage\\.googleapis\\.com/v0/b/[^/]+/o/(.+?)(?:\\?.+)?";
+        
+        // Compila el patrón regular
+        Pattern pattern = Pattern.compile(patron);
+        
+        // Crea un objeto Matcher con la URL completa
+        Matcher matcher = pattern.matcher(urlCompleta);
+        
+        // Verifica si hay coincidencias
+        if (matcher.matches()) {
+            // Obtiene la ruta y el nombre del archivo desde el grupo de captura
+            String rutaYNombre = matcher.group(1);
+            
+            // Decodifica la URL
+            try {
+                return URLDecoder.decode(rutaYNombre, StandardCharsets.UTF_8.name());
+            } catch (UnsupportedEncodingException e) {
+                e.printStackTrace();
+                return null;
+            }
+        } else {
+            System.out.println("La URL no sigue el formato esperado");
+            return null;
+        }
+    }
+
+
+	
+	
+
+	
+	
+	private String eliminarArchivoFirebase(FileInputStream serviceAccount, String bucketName, String objectName) {
+	    String respuesta = "";
+	    try {
+	        Storage storage = (Storage) getStrogaeOptions(serviceAccount).getService();
+
+	        // Elimina el archivo especificado
+	        boolean deleted = storage.delete(bucketName, objectName);
+
+	        if (deleted) {
+	            System.out.println("Se eliminó el archivo correctamente");
+	            respuesta = "Se eliminó el archivo correctamente";
+	        } else {
+	            System.out.println("No se pudo eliminar el archivo");
+	            respuesta = "No se pudo eliminar el archivo";
+	        }
+
+	        System.out.println("Object " + objectName + " was deleted from " + bucketName);
+	        return respuesta;
+	    } catch (IOException e) {
+	        System.out.println("Error al acceder a Firebase");
+	        respuesta = "Error al eliminar el archivo";
+	        return respuesta;
+	    }
+	}
+
+	
+	
+	
+	
+	
 
 	@CrossOrigin(origins = "*")
 	@GetMapping("/obtener/evidencia/documento/byte/{idInventario}/{idCampo}/{idUsuario}")
