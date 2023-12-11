@@ -290,6 +290,7 @@ public class InventarioRestController {
 		Map<String, List<Inventario>> registros = new HashMap<>();
 		List<List<Valore>> valores = new ArrayList<List<Valore>>();
 
+		System.out.println("Creando documento");
 		for (Inventario registro : listaRegistros) {
 			if (!auxProyecto.contains(registro.getProyecto().getProyecto())) {
 				listaProyectos.add(registro.getProyecto());
@@ -318,11 +319,12 @@ public class InventarioRestController {
 
 			ByteArrayInputStream in = generarDocumento.generarExcelRegistros(listaProyectos, camposProyectos, registros,
 					this.valores);
+			System.out.println("Documento generado");
 			byte[] bytes = IOUtils.toByteArray(in);
 			for (byte b : bytes) {
 				lista.add((int) b);
 			}
-
+			System.out.println("Documento creado y listo para mandar");
 		} catch (IOException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
@@ -335,6 +337,7 @@ public class InventarioRestController {
 	@PostMapping("/generar/documento/registros/{idproyecto}")
 	public List<Integer> descargarRegistros(@RequestBody List<Inventario> listaRegistros,
 			@PathVariable(value = "idproyecto") String idProyecto) {
+		System.out.println("Creando documento");
 		List<VistaDatosISSSTE> respuesta = new ArrayList<VistaDatosISSSTE>();
 		List<Integer> lista = new ArrayList<Integer>();
 
@@ -362,7 +365,9 @@ public class InventarioRestController {
 			for (byte b : bytes) {
 				lista.add((int) b);
 			}
-
+			
+			System.out.println("Documento creado y listo para mandar");
+			
 		} catch (IOException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
@@ -978,8 +983,10 @@ public class InventarioRestController {
             if(indAgrupacion != 0) {
             	 for(Campos campo : listaAgrupaciones.get(indAgrupacion).getCampos() ) {
                  	if(campo.getAgrupacion().equalsIgnoreCase("DATOS DEL REGISTRO")) {
-                 		inventario.setFolio(campo.getValor());
-                 		this.inventario.cambiarFolio(campo.getValor(), inventario.getIdinventario());
+                 		if(campo.getNombreCampo().equalsIgnoreCase("FOLIO")) {
+                 			inventario.setFolio(campo.getValor());
+                     		this.inventario.cambiarFolio(campo.getValor(), inventario.getIdinventario());
+                 		}
                  	}
                  	
                  	if(!campo.getTipoCampo().equals("FOTO") || !campo.getTipoCampo().equals("CHECKBOX-EVIDENCIA") || !campo.getTipoCampo().equals("FIRMA")) {            		
@@ -1220,29 +1227,33 @@ public class InventarioRestController {
        try {
 		BufferedImage imagen1 = ImageIO.read(new File(rutaImagen1));
 		BufferedImage imagen2 = ImageIO.read(new File(rutaImagen2));
-		int anchoImagen1 = imagen1.getWidth();
-		int altoImagen1 = imagen1.getHeight();
-		int anchoImagen2 = imagen2.getWidth();
-		int altoImagen2 = imagen2.getHeight();
-		System.out.println("Ancho 1: " + anchoImagen1);
-		System.out.println("Alto 1: " + altoImagen1);
-		System.out.println("Ancho 2: " + anchoImagen2);
-		System.out.println("Alto 2: " + altoImagen2);
+		if(imagen1 != null && imagen2 != null) {
+			int anchoImagen1 = imagen1.getWidth();
+			int altoImagen1 = imagen1.getHeight();
+			int anchoImagen2 = imagen2.getWidth();
+			int altoImagen2 = imagen2.getHeight();
+			System.out.println("Ancho 1: " + anchoImagen1);
+			System.out.println("Alto 1: " + altoImagen1);
+			System.out.println("Ancho 2: " + anchoImagen2);
+			System.out.println("Alto 2: " + altoImagen2);
 
-		if (anchoImagen1 != anchoImagen2 || altoImagen1 != altoImagen2) {
-		    System.out.println("Las imágenes tienen dimensiones diferentes.");
-		    return false;
-		}
-		
-		for (int y = 0; y < altoImagen1; y++) {
-		    for (int x = 0; x < anchoImagen1; x++) {
-		        int rgbImagen1 = imagen1.getRGB(x, y);
-		        int rgbImagen2 = imagen2.getRGB(x, y);		        
-		        if (rgbImagen1 != rgbImagen2) {
-		            System.out.println("Las imágenes son diferentes.");
-		            return false;
-		        }
-		    }
+			if (anchoImagen1 != anchoImagen2 || altoImagen1 != altoImagen2) {
+			    System.out.println("Las imágenes tienen dimensiones diferentes.");
+			    return false;
+			}
+			
+			for (int y = 0; y < altoImagen1; y++) {
+			    for (int x = 0; x < anchoImagen1; x++) {
+			        int rgbImagen1 = imagen1.getRGB(x, y);
+			        int rgbImagen2 = imagen2.getRGB(x, y);		        
+			        if (rgbImagen1 != rgbImagen2) {
+			            System.out.println("Las imágenes son diferentes.");
+			            return false;
+			        }
+			    }
+			}
+		}else {
+			return false;
 		}
 		
 	} catch (IOException e) {

@@ -85,6 +85,10 @@ public class UsuarioRestController {
 		List<String> respuesta = new ArrayList<>();
 
 		usuario.setToken("");
+		System.out.println(usuario);
+		if(usuario.getVistaCliente().getIdcliente() == 0) {
+			usuario.setVistaCliente(null);
+		}
 
 		this.usuario.save(usuario);
 

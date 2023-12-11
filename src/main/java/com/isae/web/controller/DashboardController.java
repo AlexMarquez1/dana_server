@@ -11,9 +11,11 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RestController;
 
+import com.isae.web.dao.IAsignacionClienteDAO;
 import com.isae.web.dao.IAsignacionProyectoDAO;
 import com.isae.web.dao.IEstatusProyecto;
 import com.isae.web.dao.IInventarioDAO;
+import com.isae.web.dao.IProyectoDAO;
 import com.isae.web.dao.IUsuarioDAO;
 import com.isae.web.entity.Asignacionproyecto;
 import com.isae.web.entity.EstatusProyecto;
@@ -34,6 +36,9 @@ public class DashboardController {
 	
 	@Autowired
 	private IUsuarioDAO usuario;
+	
+	@Autowired
+	private IAsignacionClienteDAO asignacionCliente;
 
 	@CrossOrigin(origins = "*")
 	@GetMapping("/obtener/total/registros/proyectos")
@@ -82,34 +87,65 @@ public class DashboardController {
 		Map<String, Object> proyectos = new HashMap<>();
 		List<Object> consulta = new ArrayList<Object>();
 		Usuario usuario = this.usuario.obtenerUsuarioPorId(Integer.parseInt(idusuario));
+		List<Proyecto> listaProyectos = new ArrayList<Proyecto>();
 		
+		if(usuario.getPerfile().getIdperfil() <= 2) {
+			 listaProyectos = this.asignacionCliente.obtenerProyectosPorClienteAplicacion(usuario.getClienteAplicacion());
+			 System.out.println("Total de proyectos: "+ listaProyectos.size());
 
-		List<Asignacionproyecto> listaProyectos = this.asignacionRegistro
-				.obtenerProyectosAsignados(Integer.parseInt(idusuario));
-
-		for (Asignacionproyecto asignacion : listaProyectos) {
-			List<EstatusProyecto> estatusProyecto = this.estatusProyecto
-					.obtenerEstatusPorProyecto(asignacion.getProyecto().getIdproyecto());
-			Map<String, Object> aux = new HashMap<>();
-			consulta = this.inventario.obtenerTotalEstatusProyectoAsignados(
-					asignacion.getProyecto(), usuario);
-			if (estatusProyecto.isEmpty()) {
-				aux.put("NUEVO", 0);
-				aux.put("ASIGNADO", 0);
-				aux.put("EN PROCESO", 0);
-				aux.put("PENDIENTE", 0);
-				aux.put("CERRADO", 0);
-			} else {
-				aux.put("CERRADO", 0);
-				for (EstatusProyecto estatus : estatusProyecto) {
-					aux.put(estatus.getEstatus(), 0);
+				for (Proyecto proyecto : listaProyectos) {
+					List<EstatusProyecto> estatusProyecto = this.estatusProyecto
+							.obtenerEstatusPorProyecto(proyecto.getIdproyecto());
+					Map<String, Object> aux = new HashMap<>();
+					consulta = this.inventario.obtenerTotalEstatusProyecto(
+							proyecto);
+					if (estatusProyecto.isEmpty()) {
+						aux.put("NUEVO", 0);
+						aux.put("ASIGNADO", 0);
+						aux.put("EN PROCESO", 0);
+						aux.put("PENDIENTE", 0);
+						aux.put("CERRADO", 0);
+					} else {
+						aux.put("CERRADO", 0);
+						for (EstatusProyecto estatus : estatusProyecto) {
+							aux.put(estatus.getEstatus(), 0);
+						}
+					}
+					for (Object item : consulta) {
+						Object[] objeto = (Object[]) item;
+						aux.put(objeto[0].toString(), objeto[1]);
+					}
+					proyectos.put(proyecto.getProyecto(), aux);
 				}
+		}else {			
+			listaProyectos = this.asignacionRegistro
+					.obtenerProyectosAsignados(usuario);
+			System.out.println("Total de proyectos asignados: "+ listaProyectos.size());
+
+			for (Proyecto proyecto : listaProyectos) {
+				List<EstatusProyecto> estatusProyecto = this.estatusProyecto
+						.obtenerEstatusPorProyecto(proyecto.getIdproyecto());
+				Map<String, Object> aux = new HashMap<>();
+				consulta = this.inventario.obtenerTotalEstatusProyectoAsignados(
+						proyecto, usuario);
+				if (estatusProyecto.isEmpty()) {
+					aux.put("NUEVO", 0);
+					aux.put("ASIGNADO", 0);
+					aux.put("EN PROCESO", 0);
+					aux.put("PENDIENTE", 0);
+					aux.put("CERRADO", 0);
+				} else {
+					aux.put("CERRADO", 0);
+					for (EstatusProyecto estatus : estatusProyecto) {
+						aux.put(estatus.getEstatus(), 0);
+					}
+				}
+				for (Object item : consulta) {
+					Object[] objeto = (Object[]) item;
+					aux.put(objeto[0].toString(), objeto[1]);
+				}
+				proyectos.put(proyecto.getProyecto(), aux);
 			}
-			for (Object item : consulta) {
-				Object[] objeto = (Object[]) item;
-				aux.put(objeto[0].toString(), objeto[1]);
-			}
-			proyectos.put(asignacion.getProyecto().getProyecto(), aux);
 		}
 
 		return proyectos;

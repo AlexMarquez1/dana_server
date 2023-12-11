@@ -42,6 +42,11 @@ public class Usuario implements Serializable {
 	@OneToOne
 	@JoinColumn(name="idcliente")
 	private ClienteAplicacion clienteAplicacion;
+	
+	//@OneToOne(cascade=CascadeType.ALL)
+	@OneToOne()
+	@JoinColumn(name="vistacliente")
+	private Cliente vistaCliente;
 
 	public Usuario() {
 	}
@@ -84,6 +89,26 @@ public class Usuario implements Serializable {
 		this.status = status;
 		this.token = token;
 		this.perfile = perfile;
+	}
+
+	public Usuario(int idusuario, String correo, String jefeinmediato, String nombre, String pass, int passtemp,
+			String telefono, String ubicacion, String usuario, String status, String token, Perfile perfile,
+			ClienteAplicacion clienteAplicacion, Cliente vistaCliente) {
+		super();
+		this.idusuario = idusuario;
+		this.correo = correo;
+		this.jefeinmediato = jefeinmediato;
+		this.nombre = nombre;
+		this.pass = pass;
+		this.passtemp = passtemp;
+		this.telefono = telefono;
+		this.ubicacion = ubicacion;
+		this.usuario = usuario;
+		this.status = status;
+		this.token = token;
+		this.perfile = perfile;
+		this.clienteAplicacion = clienteAplicacion;
+		this.vistaCliente = vistaCliente;
 	}
 
 	public int getIdusuario() {
@@ -190,12 +215,21 @@ public class Usuario implements Serializable {
 		this.clienteAplicacion = clienteAplicacion;
 	}
 
+	public Cliente getVistaCliente() {
+		return vistaCliente;
+	}
+
+	public void setVistaCliente(Cliente vistaCliente) {
+		this.vistaCliente = vistaCliente;
+	}
+
 	@Override
 	public String toString() {
 		return "Usuario [idusuario=" + idusuario + ", correo=" + correo + ", jefeinmediato=" + jefeinmediato
 				+ ", nombre=" + nombre + ", pass=" + pass + ", passtemp=" + passtemp + ", telefono=" + telefono
 				+ ", ubicacion=" + ubicacion + ", usuario=" + usuario + ", status=" + status + ", token=" + token
-				+ ", perfile=" + perfile + ", clienteAplicacion=" + clienteAplicacion + "]";
+				+ ", perfile=" + perfile + ", clienteAplicacion=" + clienteAplicacion + ", vistaCliente=" + vistaCliente
+				+ "]";
 	}
 
 }

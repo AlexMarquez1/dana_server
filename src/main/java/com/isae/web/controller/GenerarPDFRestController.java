@@ -1,6 +1,7 @@
 package com.isae.web.controller;
 
 import java.awt.Font;
+import java.awt.geom.Dimension2D;
 import java.awt.image.BufferedImage;
 import java.io.BufferedInputStream;
 import java.io.ByteArrayInputStream;
@@ -19,8 +20,10 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Calendar;
 import java.util.Collections;
 import java.util.Date;
+import java.util.GregorianCalendar;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -88,6 +91,14 @@ import net.sourceforge.barbecue.BarcodeFactory;
 import net.sourceforge.barbecue.BarcodeImageHandler;
 
 import org.apache.commons.io.FileUtils;
+import org.apache.pdfbox.pdmodel.PDDocument;
+import org.apache.pdfbox.pdmodel.PDDocumentInformation;
+import org.apache.pdfbox.pdmodel.PDPage;
+import org.apache.pdfbox.pdmodel.PDPageContentStream;
+import org.apache.pdfbox.pdmodel.PDPageTree;
+import org.apache.pdfbox.pdmodel.common.PDRectangle;
+import org.apache.pdfbox.pdmodel.font.PDFont;
+import org.apache.pdfbox.pdmodel.font.PDType1Font;
 
 @RestController
 //@RequestMapping("/generarPDF")
@@ -115,6 +126,72 @@ public class GenerarPDFRestController {
 	private IDocumentoGenerado documentoGenerado;
 
 	private String firestorage_auth = "google-service-descarga.json";
+	
+	@CrossOrigin(origins = "*")
+	@GetMapping("/generar/documento/pdf/prueba")
+	public List<Integer> generarDocumentoPrueba() throws IOException {
+		try {
+//			String path = File.createTempFile("Archivo", ".pdf").getPath();
+			String path = "/Users/isaedevelopment/Desktop/Prueba.pdf";
+			
+			//Loading an existing document
+		      PDDocument document = new PDDocument();
+		       
+		      //Retrieving the pages of the document 
+		      PDPage page = new PDPage(new PDRectangle(PDRectangle.A4.getHeight(), PDRectangle.A4.getWidth()));
+		      
+		      document.addPage(page);
+		      
+		      PDPageContentStream contentStream = new PDPageContentStream(document, page);
+		      
+		      //Begin the Content stream 
+		      contentStream.beginText(); 
+		      
+		      //Setting the font to the Content stream  
+		      contentStream.setFont(PDType1Font.HELVETICA, 12);
+
+		      //Setting the position for the line 
+		      contentStream.newLineAtOffset(25, 500);
+
+		      String text = "This is the sample document and we are adding content to it.";
+
+		      //Adding text in the form of string 
+		      contentStream.showText(text);      
+
+		      //Ending the content stream
+		      contentStream.endText();
+
+		      System.out.println("Content added");
+
+		      //Closing the content stream
+		      contentStream.close();
+
+		      //Saving the document
+		      document.save(path);
+		      
+		      
+		      PDPageTree pages = document.getPages();
+		      
+		      
+
+		      //Closing the document
+		      document.close();
+
+			
+			List<Integer> respuesta = new ArrayList<Integer>();
+
+			return respuesta;
+
+//			HttpHeaders httpHeaders = getHttpHeaders(12, "formato", invoicePdf);
+//			return new ResponseEntity<InputStreamResource>(new InputStreamResource(new FileInputStream(invoicePdf)), httpHeaders, HttpStatus.OK);
+
+		} catch (Exception e) {
+			System.out.println("Exception in Controller :: " + e.getMessage());
+//			return (ResponseEntity<InputStreamResource>) ResponseEntity.status(HttpStatus.EXPECTATION_FAILED);
+			// return new ArrayList<Integer>();
+			return new ArrayList<Integer>();
+		}
+	}
 
 	@CrossOrigin(origins = "*")
 	@PostMapping("/obtener/documento/pdf/{idInventario}")
