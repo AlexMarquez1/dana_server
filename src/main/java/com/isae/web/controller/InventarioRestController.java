@@ -965,7 +965,12 @@ public class InventarioRestController {
         	Map<String, Object> request = objectMapper.convertValue(body, Map.class);
         	
         	
+        	
         	Gson gson = new Gson();
+        	
+//        	System.out.println("Mapa del body: " + gson.toJson(request));
+
+        	
             String json = gson.toJson(request.get("usuario"));
         	
             usuario = gson.fromJson(json, new TypeToken<Usuario>(){}.getType());
@@ -994,7 +999,7 @@ public class InventarioRestController {
                  	}
                  	
                  }
-            }else {
+            }else { 
             	for(int i =0; i < listaAgrupaciones.size(); i++) {
             		 for(Campos campo : listaAgrupaciones.get(i).getCampos() ) {
                       	if(campo.getAgrupacion().equalsIgnoreCase("DATOS DEL REGISTRO")) {
@@ -1024,13 +1029,22 @@ public class InventarioRestController {
              	json = gson.toJson(request.get("fotos"));
              	listaFotos = gson.fromJson(json, new TypeToken<List<Evidencia>>(){}.getType());
              	actualizarEvidencia(usuario.getIdusuario(),listaFotos);
+             	
+             	
              }
+             
+             System.out.println(request.get("evidencias"));
+             
+             System.out.println("---------EVIDENCIAS-------------");
+             
              if(request.get("evidencias") != null) {
              	System.out.println("Datos con Evidencias");
              	json = gson.toJson(request.get("evidencias"));
              	listaEvidencias = gson.fromJson(json, new TypeToken<List<Evidencia>>(){}.getType());
+                System.out.println(listaEvidencias);
              	actualizarEvidencia(usuario.getIdusuario(),listaEvidencias);
              }
+             System.out.println("---------EVIDENCIAS-------------");
         
         
         } catch (Exception e) {
