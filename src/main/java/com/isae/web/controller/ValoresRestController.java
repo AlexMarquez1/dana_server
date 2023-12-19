@@ -255,14 +255,22 @@ public class ValoresRestController {
 		
 		Camposproyecto campoProyecto = gson.fromJson(json, new TypeToken<Camposproyecto>(){}.getType());
 		
-		json = gson.toJson(contenido.get("usuarios"));
-		List<Usuario> listaUsuarios = gson.fromJson(json, new TypeToken<List<Usuario>>(){}.getType());
-		
 		json = gson.toJson(contenido.get("proyecto"));
 		
 		List<Proyecto> proyecto = gson.fromJson(json, new TypeToken<List<Proyecto>>(){}.getType());
 		
-		respuesta = this.valores.obtenerValoresPorCampoProyecto(proyecto.get(0), campoProyecto, listaUsuarios);
+		if(!gson.toJson(contenido.get("usuarios")).equals("[]")) {
+			
+			json = gson.toJson(contenido.get("usuarios"));
+			List<Usuario> listaUsuarios = gson.fromJson(json, new TypeToken<List<Usuario>>(){}.getType());
+			
+			respuesta = this.valores.obtenerValoresPorCampoProyecto(proyecto.get(0), campoProyecto, listaUsuarios);
+			
+		}else {
+			respuesta = this.valores.obtenerValoresPorCampoProyecto(proyecto.get(0), campoProyecto); //Se agrego esta linea para cuando no se mande los users
+		}
+		
+		
 		
 		return respuesta;
 	}
