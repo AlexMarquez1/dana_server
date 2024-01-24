@@ -1,5 +1,7 @@
 package com.isae.web.dao;
 
+import java.util.List;
+
 import javax.transaction.Transactional;
 
 import org.springframework.data.jpa.repository.JpaRepository;
@@ -25,6 +27,9 @@ public interface IProyectoDAO extends JpaRepository<Proyecto,Integer>{
 	
 	@Query(value="SELECT * FROM proyecto WHERE idproyecto =:id" , nativeQuery = true)
 	Proyecto obtenerProyectoPorId(@Param("id") int id);
+	
+	@Query(value="SELECT * FROM proyecto WHERE proyecto like 'DASHBOARD%'" , nativeQuery = true)
+	List<Proyecto> obtenerProyectoDashboard();
 	
 	@Modifying
     @Transactional

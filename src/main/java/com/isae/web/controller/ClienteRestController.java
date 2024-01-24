@@ -13,6 +13,7 @@ import org.springframework.web.bind.annotation.RestController;
 
 import com.isae.web.dao.IAsignacionClienteDAO;
 import com.isae.web.dao.IClienteDAO;
+import com.isae.web.dao.IProyectoDAO;
 import com.isae.web.entity.Cliente;
 import com.isae.web.entity.Proyecto;
 
@@ -24,6 +25,9 @@ public class ClienteRestController {
 	
 	@Autowired
 	private IAsignacionClienteDAO asignacionCliente;
+	
+	@Autowired
+	private IProyectoDAO proyecto;
 	
 	@CrossOrigin(origins="*")
 	@GetMapping("/obtener/clientes")
@@ -44,6 +48,13 @@ public class ClienteRestController {
 		
 		return this.asignacionCliente.obtenerProyectosPorCliente(cliente);
 	}
+	
+	@CrossOrigin(origins="*")
+	@GetMapping("obtener/proyectos/dashboard")
+	public List<Proyecto> obtenerProyectosDasboard(){
+		return this.proyecto.obtenerProyectoDashboard();
+	}
+	
 	
 	@CrossOrigin(origins="*")
 	@PostMapping("/nuevo/cliente")

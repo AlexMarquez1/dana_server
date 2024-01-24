@@ -663,6 +663,129 @@ public class InventarioRestController {
 
 		return respuesta;
 	}
+	
+	
+	@CrossOrigin(origins = "*")
+	@GetMapping("/obtener/excel/datos/local/{idusuario}/{idproyecto}")
+	public String obtenerExcelDatosLocal(
+			@PathVariable(value = "idusuario") String idUsuario,
+			@PathVariable(value = "idproyecto") String idProyecto) {
+		String respuesta = "correcto";
+
+		String rutaArchivo = "prueba issste.xlsx"; // Cambia esto a la ruta correcta de tu archivo
+
+	    File archivoExcel = new File(rutaArchivo);
+
+		File tempFile;
+		
+		LeerDocumentoExcel leerDocumentoExcel = new LeerDocumentoExcel();
+
+		List<Camposproyecto> listaCampos = this.camposProyecto
+				.obtenerCatalogoCampoPorProyecto(Integer.parseInt(idProyecto));
+		Proyecto proyecto = this.proyecto.obtenerProyectoPorId(Integer.parseInt(idProyecto));
+
+		// Valores obtenidos en la respuesta:
+		// listaFolios
+		// listaValores
+		Map<String, Object> respuestaDocumento = leerDocumentoExcel.leerDocumento(archivoExcel, listaCampos, proyecto);
+		List<Inventario> listaInventarios = (List<Inventario>) respuestaDocumento.get("listaInventarios");
+		List<Valore> listaValores = (List<Valore>) respuestaDocumento.get("listaValores");
+		List<String> listaFolios = (List<String>) respuestaDocumento.get("listaFolios");
+		String estatus = (String) respuestaDocumento.get("Estatus");
+
+		System.out.println("Folios a ingresar: " + listaFolios);
+		System.out.println("Total Inventarios: " + listaInventarios.size());
+		System.out.println("Total Valores: " + listaValores.size());
+		System.out.println(estatus);
+
+		if (estatus.equalsIgnoreCase("Correcto")) {
+			System.out.println("Se leyo el documento Correctamente, listo para cargar los datos");
+			List<Inventario> respuestaInventarios = this.inventario.obtenerFoliosRegistrados(listaFolios);
+
+			if (respuestaInventarios.isEmpty()) {
+				System.out.println("Sin folios Repetidos");
+
+				// Guardando Inventario
+				List<Inventario> inventariosGuardados = this.inventario.saveAll(listaInventarios);
+
+				List<Valore> listaValoresRegistrar = new ArrayList<Valore>();
+
+				int totalCampos = listaCampos.size();
+				int indInventario = 0;
+				int contadorCampos = 1;
+				for (int i = 0; i < listaValores.size(); i++) {
+					Valore valor = listaValores.get(i);
+					 
+					//System.out.println(valor);
+					if (contadorCampos == totalCampos) {
+
+						contadorCampos = 1;
+						try {
+						listaValoresRegistrar.add(new Valore(0, valor.getValor(), valor.getCamposproyecto(),
+								inventariosGuardados.get(indInventario)));
+						indInventario++;
+						}catch(Exception ex) {
+							System.out.println("-----VALORES === ------");
+							System.out.println(ex);
+							System.out.println(valor.getValor());
+							System.out.println(valor.getCamposproyecto());
+						}
+					} else {
+						System.out.println("CAMPOS : " + contadorCampos);
+						try {
+							listaValoresRegistrar.add(new Valore(0, valor.getValor(), valor.getCamposproyecto(),
+									inventariosGuardados.get(indInventario)));
+							contadorCampos++;
+							}catch(Exception ex) {
+								System.out.println("-----VALORES------");
+								System.out.print("Error exception: ");
+								System.out.println(ex);
+								/*System.out.print("Valor: ");
+								System.out.println(valor.getValor());
+								System.out.print("Campo: ");
+								System.out.println(valor.getCamposproyecto());*/
+							}
+						
+					}
+				}
+
+				PagingList<Valore> paging = new PagingList<>(listaValoresRegistrar, 1000);
+
+				while (paging.hasNext()) {
+					this.valores.saveAll(paging.next());
+				}
+
+
+				List<Asignacionregistro> asignacionRegistro = new ArrayList<Asignacionregistro>();
+
+				for (Inventario inventario : inventariosGuardados) {
+					asignacionRegistro
+							.add(new Asignacionregistro(0, new Usuario(Integer.parseInt(idUsuario)), inventario));
+				}
+
+				// Guardando Asignacion de Registros
+				this.asignacionRegistro.saveAll(asignacionRegistro);
+
+			} else {
+				System.out.println("Folios Repetidos");
+				respuesta = "Folios Repetidos>";
+				for (Inventario inventario : respuestaInventarios) {
+					respuesta += inventario.getFolio() + ">";
+				}
+			}
+		} else if (estatus.equalsIgnoreCase("El documento no tiene el mismo formato")) {
+			respuesta = estatus;
+		} else if (estatus.contains("Error")) {
+			System.out.println("Dentro del if error");
+			respuesta = estatus;
+		} else {
+			respuesta = "Error al leer el documento";
+		}
+
+		System.out.println("Respuesta: " + estatus);
+
+		return respuesta;
+	}
 
 	@CrossOrigin(origins = "*")
 	@PostMapping("/obtener/pdf/seleccionado/{proyecto}/{paginas}")

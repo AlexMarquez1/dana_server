@@ -21,4 +21,5 @@ public interface IAsignacionClienteDAO extends JpaRepository<AsignacionCliente, 
 	@Query(value="SELECT p FROM AsignacionCliente a INNER JOIN a.cliente c INNER JOIN a.proyecto p INNER JOIN c.clienteAplicacion i WHERE c.clienteAplicacion =:clienteaplicacion")
 	List<Proyecto> obtenerProyectosPorClienteAplicacion(@Param("clienteaplicacion") ClienteAplicacion clienteAplicacion);
 	
+	
 }
