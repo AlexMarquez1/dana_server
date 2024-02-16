@@ -19,6 +19,8 @@ import com.isae.web.entity.Usuario;
 
 @Repository
 public interface IInventarioDAO extends JpaRepository<Inventario,Integer>{
+	
+	boolean existsByFolio(String folio);
 
 	@Query(value="SELECT folio FROM inventario WHERE folio= :folio AND idproyecto= :idProyecto" , nativeQuery = true)
 	List<String> comprobarFolio(@Param("folio") String folio, @Param("idProyecto") int idProyecto);

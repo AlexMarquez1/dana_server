@@ -16,6 +16,7 @@ import com.isae.web.entity.Usuario;
 
 @Repository
 public interface IUsuarioDAO extends JpaRepository<Usuario ,Integer>{
+	
 
 	@Modifying
     @Transactional

@@ -140,6 +140,13 @@ public class InventarioRestController {
 	
 	@Autowired
 	private IFirmaDocumentosDAO firma;
+	
+	
+	@CrossOrigin(origins ="*")
+	@GetMapping("/exist/folio/{folio}")
+	public Boolean existFolio(@PathVariable (value = "folio") String folio) {
+		return this.inventario.existsByFolio(folio);
+	}
 
 	@CrossOrigin(origins = "*")
 	@PostMapping("/registrar/registro/plantilla/{idProyecto}")

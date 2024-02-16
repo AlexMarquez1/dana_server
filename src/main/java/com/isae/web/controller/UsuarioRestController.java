@@ -78,7 +78,7 @@ public class UsuarioRestController {
 
 	@Autowired
 	private JavaMailSender mailSender;
-
+	
 	@CrossOrigin(origins = "*")
 	@PostMapping("/crear/usuario")
 	public List<String> ingresarUsuario(@RequestBody Usuario usuario) {
@@ -325,5 +325,28 @@ public class UsuarioRestController {
 		usuario = this.usuario.obtenerUsuarioPorId(Integer.parseInt(id));
 		return usuario;
 	}
+	
+	@CrossOrigin(origins = "*")
+	@GetMapping("/get/user/assitent/{name}/{fecha}")
+	public String getUserAssistent(@PathVariable (value ="name") String name, @PathVariable(value="fecha") String fecha) {
+		//String name = "YAÑEZ RIVAS JONATAN ALEXIS";
+		//String fecha = "2024-02-14";
+		String[] fechadividir = fecha.split("-");
+		String fechaok = fechadividir[2] + "-" +fechadividir[1] + "-" +fechadividir[0]; 
+		System.out.println(name);
+		System.out.println(fecha);
+		Usuario user = this.usuario.obtenerUsuarioPorNombre(name);
+		System.out.println(user);
+		List<Diasasistencia> lista = this.diaAsistencia.obtenerAsistenciaUsuario(user.getIdusuario(),fechaok, fechaok);
+		System.out.println(lista.size());
+		if(lista.size() > 0) {
+			System.out.println(lista.get(0).getAsistencia().getHoraentrada());
+			System.out.println(lista.get(0).getAsistencia().getHorasalida());
+			return lista.get(0).getAsistencia().getHoraentrada();
+		}
+		return "SIN ASISTENCIA";
+		
+	}
+	
 
 }

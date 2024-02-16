@@ -50,7 +50,7 @@ public class ClienteRestController {
 	}
 	
 	@CrossOrigin(origins="*")
-	@GetMapping("obtener/proyectos/dashboard")
+	@GetMapping("/obtener/proyectos/dashboard")
 	public List<Proyecto> obtenerProyectosDasboard(){
 		return this.proyecto.obtenerProyectoDashboard();
 	}

@@ -89,6 +89,7 @@ public class AsignacionProyectoRestController {
 	@CrossOrigin(origins = "*")
 	@GetMapping("/obtener/registros/asignados/{idusuario}")
 	public List<String> getRegistrosAsignados(@PathVariable(value = "idusuario") String idusuario) {
+		System.out.println(this.asignacionProyecto.obtenerRegistroAsignado(Integer.parseInt(idusuario)));
 		return this.asignacionProyecto.obtenerRegistroAsignado(Integer.parseInt(idusuario));
 	}
 	
