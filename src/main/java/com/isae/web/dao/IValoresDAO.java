@@ -36,7 +36,7 @@ public interface IValoresDAO extends JpaRepository<Valore, Integer> {
 	@Query(value= "SELECT valores.id, valores.idvalor, valores.valor, valores.idcampoproyecto, valores.idinventario FROM valores INNER JOIN camposproyecto ON camposproyecto.idcamposproyecto = idcampoproyecto INNER JOIN proyecto ON proyecto.idproyecto = camposproyecto.idproyecto WHERE proyecto.idproyecto = :idProyecto", nativeQuery = true)
 	List<Valore> obtenerDatosCampoPorProyecto(@Param("idProyecto") int idProyecto);
 	
-	@Query("SELECT v FROM Valore v JOIN v.inventario i WHERE v.valor in :valores AND v.camposproyecto in :campos AND i.proyecto = :idproyecto AND v.inventario !=:inventario AND v.valor !='N/A' AND v.valor !='NA' AND v.valor !='-' AND v.valor !='' AND v.valor !=' '")
+	@Query("SELECT v FROM Valore v JOIN v.inventario i WHERE v.valor in :valores AND v.camposproyecto in :campos AND i.proyecto = :idproyecto AND v.inventario !=:inventario AND v.valor !='N/A' AND v.valor !='NA' AND v.valor !='-' AND v.valor !='' AND v.valor !=' ' AND v.valor !='ILEGIBLE'")
 	List<Valore> obtenerDuplicidad(@Param("valores") List<String> valores, @Param("campos") List<Camposproyecto> camposProyecto, @Param("idproyecto") Proyecto idProyecto, @Param("inventario") Inventario ivnentario );
 	
 	@Modifying

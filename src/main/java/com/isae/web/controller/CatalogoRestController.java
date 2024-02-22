@@ -57,6 +57,7 @@ public class CatalogoRestController {
 	public List<String> ingresarCatalogo(@RequestBody List<String> contenidoCatalogo,
 			@PathVariable(value = "idProyecto") String idProyecto,
 			@PathVariable(value = "tipoCatalogo") String tipoCatalogo) {
+		System.out.println("agregando nuevos valores");
 		List<String> respuesta = new ArrayList<>();
 		Catalogo catalogo = new Catalogo();
 		List<Catalogo> listaCatalogo = new ArrayList<Catalogo>();
