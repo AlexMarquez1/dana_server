@@ -49,7 +49,7 @@ public interface IValoresDAO extends JpaRepository<Valore, Integer> {
 	@Query(value= "UPDATE valores SET idvalor= :valor WHERE idcampoproyecto = :idcampoproyecto AND idinventario = :idinventario", nativeQuery = true)
 	void actualizaridValorValores(@Param("valor") String valor, @Param("idcampoproyecto") int idcampoproyecto, @Param("idinventario") int idinventario );
 	
-	@Query(value= "SSELECT idvalor FROM valores WHERE idinventario = :idinventario AND idcampoproyecto = :idcampoproyecto", nativeQuery = true)
+	@Query(value= "SELECT idvalor FROM valores WHERE idinventario = :idinventario AND idcampoproyecto = :idcampoproyecto", nativeQuery = true)
 	String obtenerIdValorValores(@Param("idcampoproyecto") int idcampoproyecto, @Param("idinventario") int idinventario);
 	
 	@Query(value= "SELECT valor FROM valores WHERE idcampoproyecto = :idcampoproyecto AND idinventario = :idinventario", nativeQuery = true)

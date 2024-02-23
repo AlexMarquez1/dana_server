@@ -328,6 +328,9 @@ public class GenerarPDFRestController {
 				documento.setIddocumento(lista.get(0).getIddocumento());
 				this.documentoGenerado.save(documento);
 			}
+			
+			inventario.setEstatus("CERRADO");
+			this.inventario.save(inventario);
 
 			return respuesta;
 
