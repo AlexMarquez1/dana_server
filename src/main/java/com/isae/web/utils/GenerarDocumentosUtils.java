@@ -6,6 +6,7 @@ import java.io.IOException;
 import java.math.BigInteger;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
+import java.util.ArrayList;
 import java.util.Date;
 import java.util.LinkedList;
 import java.util.List;
@@ -1299,7 +1300,7 @@ public class GenerarDocumentosUtils {
 //		}
 //	}
 
-	@Async("threadPoolTaskExecutor")
+	/*@Async("threadPoolTaskExecutor")
 	public ByteArrayInputStream generarExcelRegistros(List<Proyecto> listaProyectos,
 			Map<String, List<Camposproyecto>> camposProyecto, Map<String, List<Inventario>> registros,
 			IValoresDAO valoresDAO) throws IOException {
@@ -1381,7 +1382,86 @@ public class GenerarDocumentosUtils {
 	        
 			return new ByteArrayInputStream(out.toByteArray());
 		}
+	}*/
+	
+	
+	
+	@Async("threadPoolTaskExecutor")
+	public ByteArrayInputStream generarExcelRegistros(List<Proyecto> listaProyectos,
+	        Map<String, List<Camposproyecto>> camposProyecto, Map<String, List<Inventario>> registros,
+	        IValoresDAO valoresDAO) throws IOException {
+
+	    try (Workbook workbook = new HSSFWorkbook(); ByteArrayOutputStream out = new ByteArrayOutputStream();) {
+
+	        Font headerFont = workbook.createFont();
+	        headerFont.setBold(true);
+	        headerFont.setColor(IndexedColors.WHITE.getIndex());
+
+	        CellStyle headerCellStyle = workbook.createCellStyle();
+	        headerCellStyle.setFont(headerFont);
+	        headerCellStyle.setAlignment(HorizontalAlignment.CENTER);
+	        headerCellStyle.setVerticalAlignment(VerticalAlignment.CENTER);
+	        headerCellStyle.setFillForegroundColor(IndexedColors.LIGHT_BLUE.getIndex());
+	        headerCellStyle.setFillPattern(FillPatternType.SOLID_FOREGROUND);
+	        headerCellStyle.setBorderBottom(BorderStyle.HAIR);
+	        headerCellStyle.setBorderTop(BorderStyle.HAIR);
+	        headerCellStyle.setBorderLeft(BorderStyle.HAIR);
+	        headerCellStyle.setBorderRight(BorderStyle.HAIR);
+
+	        CellStyle cellStyle = workbook.createCellStyle();
+	        cellStyle.setAlignment(HorizontalAlignment.CENTER);
+	        cellStyle.setVerticalAlignment(VerticalAlignment.CENTER);
+	        cellStyle.setBorderBottom(BorderStyle.HAIR);
+	        cellStyle.setBorderTop(BorderStyle.HAIR);
+	        cellStyle.setBorderLeft(BorderStyle.HAIR);
+	        cellStyle.setBorderRight(BorderStyle.HAIR);
+
+	        for (Proyecto proyecto : listaProyectos) {
+	            Sheet sheet = workbook.createSheet(proyecto.getProyecto());
+	            int celda = 0;
+
+	            Row rowTitulo = sheet.createRow(celda++);
+	            for (int i = 0; i < camposProyecto.get(proyecto.getProyecto()).size(); i++) {
+	                Cell encabezado2 = rowTitulo.createCell(i);
+	                encabezado2.setCellValue(camposProyecto.get(proyecto.getProyecto()).get(i).getCampo());
+	                encabezado2.setCellStyle(headerCellStyle);
+	                sheet.autoSizeColumn(i);
+	            }
+
+	            Row rowDatos = sheet.createRow(celda++);
+	            rowDatos.setRowStyle(cellStyle);
+
+	            List<List<Valore>> valoresList = new ArrayList<>();
+	            for (Inventario registro : registros.get(proyecto.getProyecto())) {
+	                List<Valore> valores = valoresDAO.obtenerDatosCampoPorProyecto(registro.getIdinventario(),
+	                        proyecto.getIdproyecto());
+	                System.out.println(valores);
+	                valoresList.add(valores);
+	            }
+
+	            for (List<Valore> valores : valoresList) {
+	                for (int i = 0; i < valores.size(); i++) {
+	                	Cell dato = rowDatos.createCell(i);
+	                	//System.out.println(valores.get(i).getCamposproyecto().getCampo());
+	                	if(valores.get(i).getCamposproyecto().getProyecto().getIdproyecto() == 235 && valores.get(i).getCamposproyecto().getCampo().equals("CORREO")){
+	                		
+	                		dato.setCellValue(valores.get(i).getValor().toLowerCase());
+	                	}else {
+	                		dato.setCellValue(valores.get(i).getValor());
+	                	}
+	                	
+	                    
+	                    
+	                }
+	                rowDatos = sheet.createRow(celda++);
+	            }
+	        }
+
+	        workbook.write(out);
+	        return new ByteArrayInputStream(out.toByteArray());
+	    }
 	}
+
 	
 	
 	@Async("threadPoolTaskExecutor")
