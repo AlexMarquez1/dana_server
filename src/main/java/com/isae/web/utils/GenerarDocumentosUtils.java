@@ -1430,12 +1430,11 @@ public class GenerarDocumentosUtils {
 
 	            Row rowDatos = sheet.createRow(celda++);
 	            rowDatos.setRowStyle(cellStyle);
-
+	            System.out.println("Cargando");
 	            List<List<Valore>> valoresList = new ArrayList<>();
 	            for (Inventario registro : registros.get(proyecto.getProyecto())) {
 	                List<Valore> valores = valoresDAO.obtenerDatosCampoPorProyecto(registro.getIdinventario(),
 	                        proyecto.getIdproyecto());
-	                System.out.println(valores);
 	                valoresList.add(valores);
 	            }
 
@@ -1444,13 +1443,10 @@ public class GenerarDocumentosUtils {
 	                	Cell dato = rowDatos.createCell(i);
 	                	//System.out.println(valores.get(i).getCamposproyecto().getCampo());
 	                	if(valores.get(i).getCamposproyecto().getProyecto().getIdproyecto() == 235 && valores.get(i).getCamposproyecto().getCampo().equals("CORREO")){
-	                		
 	                		dato.setCellValue(valores.get(i).getValor().toLowerCase());
 	                	}else {
 	                		dato.setCellValue(valores.get(i).getValor());
-	                	}
-	                	
-	                    
+	                	}  
 	                    
 	                }
 	                rowDatos = sheet.createRow(celda++);
